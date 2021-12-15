@@ -8,7 +8,7 @@ These scripts should be general purpose and "just work". No janky hacks are pres
 
 Just need to write some scripts as functions and we're good to go.
 
-~~~
+---
 
 IRIS_SG_deconvolve.py authored by Dr Graham S. Kerr.
 IRIS_SG_PSFs.pkl supplied by Dr Graham S. Kerr.
@@ -18,6 +18,6 @@ fit_iris_xput.pro translated by Aaron W. Peat.
 radcal.py authored by Aaron W. Peat
 deconvolve.py authored by Aaron W. Peat
 
-~~~
+---
 
 Special thanks to Dr C.M.J. Osborne (https://github.com/Goobley) for putting up with my incessant and innane questions.
