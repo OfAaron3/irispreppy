@@ -29,7 +29,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         4. Translated from iris_get_response.pro. Originally by J.P.Weulser, S.L. Freeland, and G.Chintzoglou
 
     History:
-        2021-12-14 - A.W.Peat - Translated from IDL
+        2021-12-14 - A.W.Peat - Translated from IDL  and added QOL improvements
     '''
 
     toppath=path.dirname(path.realpath(__file__))
@@ -217,7 +217,7 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
         2. Based on fit_iris_xput.pro by JPW.
 
     History:
-        2021-12-14 - A.W.Peat - Translated from IDL and added QOL improvements
+        2021-12-14 - A.W.Peat - Translated from IDL
     '''
     tex=1.5 # ; exponent for transition between exp.decay intervals
     if tcc0.shape[1]!=2:
