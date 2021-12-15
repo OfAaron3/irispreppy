@@ -77,21 +77,15 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
     with open(response, "rb") as pklin:
         r=pickle.load(pklin) #Loading in the response file and calling it r
 
-
+    #0b Handling keywords
     if int(r['version'])<2:
         if angstrom:
             r['lambda']=r['lambda']*10
         return(r)
-    #1. Output structure
 
-
-
-    if type(date)==str:
-        ntt=1 #Number of times in the time array
-    else:
-        ntt=len(date)
-        #This should also work for 1-D numpy arrays as well as lists
+    ntt=1 #ntt is always 1 since this will have a wrapper around it
     
+    #1. Output structure
     if full:
         o1=r #Output 1. Is temporary
     else:
