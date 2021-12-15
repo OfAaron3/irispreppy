@@ -29,7 +29,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         4. Translated from iris_get_response.pro. Originally by J.P.Weulser, S.L. Freeland, and G.Chintzoglou
 
     History:
-        2021-12-14 - A.W.Peat - Translated from IDL  and added QOL improvements
+        2021-12-14 - A.W.Peat - Translated from IDL and added QOL improvements
     '''
 
     toppath=path.dirname(path.realpath(__file__))
@@ -49,6 +49,9 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
             recgeny=newgeny[list(newgeny.keys())[0]][0]
             with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                 pickle.dump(recgeny, pklout)
+
+            resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
+            resps.sort()
 
     #0a Opening correct file
     if pre_launch:
