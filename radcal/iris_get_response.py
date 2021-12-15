@@ -10,10 +10,6 @@ from astropy.time import Time
 import numpy as np
 from scipy.interpolate import interp1d
 
-import matplotlib.pyplot as plt
-from copy import deepcopy as dc
-from tqdm import tqdm
-
 def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), version=0, response_file=None, pre_launch=False, full=False, angstrom=False):
     '''Intended to replace iris_get_response.pro
     Input Parameters:
