@@ -20,4 +20,4 @@ deconvolve.py authored by Aaron W. Peat
 
 ~~~
 
-Special thanks to Dr C.M. Osborne (https://github.com/Goobley) for putting up with my incessant and innane questions.
+Special thanks to Dr C.M.J. Osborne (https://github.com/Goobley) for putting up with my incessant and innane questions.
