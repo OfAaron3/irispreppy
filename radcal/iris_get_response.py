@@ -217,7 +217,7 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
         2. Based on fit_iris_xput.pro by JPW.
 
     History:
-        2021-12-14 - A.W.Peat - Translated from IDL
+        2021-12-14 - A.W.Peat - Translated from IDL and added QOL improvements
     '''
     tex=1.5 # ; exponent for transition between exp.decay intervals
     if tcc0.shape[1]!=2:
