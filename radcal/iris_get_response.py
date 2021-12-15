@@ -31,7 +31,8 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         2021-12-14 - A.W.Peat - Translated from IDL
     '''
 
-    resps=ls("./responses/*.*")
+    toppath=path.dirname(path.realpath(__file__))
+    resps=ls(toppath+"/responses/*.*")
     resps.sort()
 
     #Checks for new responses everytime it is run
@@ -39,13 +40,13 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         htmlsoup=BeautifulSoup(respurl, 'html.parser')
     for tags in htmlsoup.find_all('a'):
         href=tags.get('href')
-        if "sra" in href and './responses/'+href[:-4]+'pkl' not in resps:
+        if "sra" in href and toppath+'/responses/'+href[:-4]+'pkl' not in resps:
             print("New response file found, "+href+'.\nDownloading...')
             call("curl https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href+' -o temp.geny', shell=True)
             newgeny=readsav('./temp.geny')
             call('rm temp.geny', shell=True)
             recgeny=newgeny[list(newgeny.keys())[0]][0]
-            with open("./responses/"+href[:-4]+'pkl', "wb") as pklout:
+            with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                 pickle.dump(recgeny, pklout)
 
     #0a Opening correct file
@@ -61,7 +62,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
             print("Requested version of response file not found. Defaulting to most recent version.")
             response=resps[-1]
     elif response_file!=None:
-        if "./responses/"+response_file not in resps:
+        if toppath+"/responses/"+response_file not in resps:
             print(response_file+" not found. Using most recent file.")
             response=resps[-1]
         else:
@@ -270,14 +271,15 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
 
 
 if __name__=="__main__":
-    #When script is called directly, it just looks for new response files
-    resps=ls("./responses/*.*")
+    #When script is called directly, it just looks for new response files#
+    toppath=path.dirname(path.realpath(__file__))
+    resps=ls(toppath+"/responses/*.*")
     new=False
     with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
         htmlsoup=BeautifulSoup(respurl, 'html.parser')
     for tags in htmlsoup.find_all('a'):
         href=tags.get('href')
-        if "sra" in href and './responses/'+href[:-4]+'pkl' not in resps:
+        if "sra" in href and toppath+'/responses/'+href[:-4]+'pkl' not in resps:
             new=True
             print("New response file found, "+href+'.\nDownloading...')
             call("curl https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href+' -o temp.geny', shell=True)
@@ -285,7 +287,9 @@ if __name__=="__main__":
 
             call('rm temp.geny', shell=True)
             recgeny=newgeny[list(newgeny.keys())[0]][0]
-            with open("./responses/"+href[:-4]+'pkl', "wb") as pklout:
+            with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                 pickle.dump(recgeny, pklout)
     if not new:
         print("No new response files found.")
+
+    
