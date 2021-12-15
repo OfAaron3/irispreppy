@@ -11,7 +11,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), version=0, response_file=None, pre_launch=False, full=False, angstrom=False):
-    '''Intended to replace iris_get_response.pro
+    '''Intended to use in place of iris_get_response.pro
     Input Parameters:
         date: Time or time list. Default is now.
         version: Which version of the response file you want. Default is newest. Version numbers are 1 indexed, so the default 0 becomes -1.
@@ -26,6 +26,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         2. Code automatically checks https://hesperia.gsfc.nasa.gov/ssw/iris/response/ for new response files. If this url
         changes in the future, do a search and replace. The files are assumed to be geny IDL structs.
         3. All original comments will be preceeded by ;, as is convention in IDL
+        4. Translated from iris_get_response.pro. Originally by J.P.Weulser, S.L. Freeland, and G.Chintzoglou
 
     History:
         2021-12-14 - A.W.Peat - Translated from IDL
@@ -208,9 +209,13 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     '''
     Stripped down form of fit_iris_xput.pro, using only the things 
     get_iris_response.pro uses.
-    I am so sorry, I have no idea what any of these keywords are.
-    The previous documentation is horrible. I will include ALL of their comments.
-    All their comments will be preceded by ;, as is convention in IDL
+    I am so sorry, but I have no idea what any of these keywords are.
+    The previous documentation is very cryptic. I will include ALL of their comments.
+    A
+
+    Notes:
+        1. All original comments will be preceeded by ;, as is convention in IDL
+        2. Based on fit_iris_xput.pro by JPW.
 
     History:
         2021-12-14 - A.W.Peat - Translated from IDL
@@ -228,7 +233,8 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     yr2sec=365.25*24*60*60
     tcc=(tcc0+nasaLag)/yr2sec 
     tt=Time(tt0).unix/yr2sec
-    ntt=1 #Always going to be 1 here
+    ntt=1 
+    #Always going to be 1 in this instance. Script can, in theory, take more than one input.
         
     if ccc.size!=3*m:
         raise RuntimeError("Incorrect number of elements in tcoef (tcco)")
