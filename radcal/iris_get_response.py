@@ -211,7 +211,6 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     get_iris_response.pro uses.
     I am so sorry, but I have no idea what any of these keywords are.
     The previous documentation is very cryptic. I will include ALL of their comments.
-    A
 
     Notes:
         1. All original comments will be preceeded by ;, as is convention in IDL
