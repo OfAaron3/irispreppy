@@ -6,7 +6,7 @@ This has been a passion project of mine during my PhD. It keeps itself up to dat
 
 These scripts should be general purpose and "just work". No janky hacks are present.
 
-Just need to sort out some directory malarkey, and it's good to go.
+Just need to write some scripts as functions and we're good to go.
 
 ~~~
 
@@ -17,3 +17,7 @@ iris_get_response.pro translated by Aaron W. Peat.
 fit_iris_xput.pro translated by Aaron W. Peat.
 radcal.py authored by Aaron W. Peat
 deconvolve.py authored by Aaron W. Peat
+
+~~~
+
+Special thanks to Dr C.M. Osborne (https://github.com/Goobley) for putting up with my incessant and innane questions.
