@@ -10,12 +10,12 @@ Just need to write some scripts as functions and we're good to go.
 
 ---
 
-IRIS_SG_deconvolve.py authored by Dr Graham S. Kerr.
-IRIS_SG_PSFs.pkl supplied by Dr Graham S. Kerr.
+IRIS_SG_deconvolve.py authored by Dr Graham S. Kerr.<br>
+IRIS_SG_PSFs.pkl supplied by Dr Graham S. Kerr.<br>
 
-iris_get_response.pro translated by Aaron W. Peat.
-fit_iris_xput.pro translated by Aaron W. Peat.
-radcal.py authored by Aaron W. Peat
+iris_get_response.pro translated by Aaron W. Peat.<br>
+fit_iris_xput.pro translated by Aaron W. Peat.<br>
+radcal.py authored by Aaron W. Peat<br>
 deconvolve.py authored by Aaron W. Peat
 
 ---
