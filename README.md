@@ -1,4 +1,4 @@
-# IRISPreppy
+# irispreppy
 For radiometrically calibrating and PSF deconvolving IRIS data.
 
 I dislike how I need to own proprietary software (IDL) just to simply prepare my data. I use Python for my analysis, why can't I radiometrically calibrate and deconvolve with it?
