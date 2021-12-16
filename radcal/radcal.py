@@ -22,6 +22,8 @@ def radcal(ras, save=False, quiet=False):
                    List of hdus from same observation
              hdu : An IRIS observation
         save: Save the output files in the same directory as the input file with "rc" appended to the end of the file. Default is False
+              If True: Saves radiometrically calibrated files in the same directory as the input file with "rc" appended to the end of the filename. Does not return radiometrically calibrated hduls
+              If False: Does exact opposite of True case. Does not save, and does return radiometrically calibrated hduls
         quiet: Suppress print outputs. Default False.
     '''
 
@@ -326,5 +328,5 @@ def radcal(ras, save=False, quiet=False):
                 if k==end-1:
                     return(callist)
             return(hdul)
-
-    print("Done!")
+    if not quiet:
+        print("Done!")
