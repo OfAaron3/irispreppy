@@ -12,53 +12,65 @@ import iris_get_response as igr
 
 #################################################################
 
-#Please set your directory for the rasters here
-#RASterS
-rass='/home/aaron/Desktop/herc_dat/20191001/*.fits'
+def radcal(ras, save=False, quiet=False):
+    '''Radiometric Calibration of IRIS files
+    Input Paramaters:
+        ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
+             String: Path to IRIS spectrograph file
+                     Path to IRIS files using wildcard (ie, /path/to/files/*fits) of same observation
+             List: List of paths to spectrograph file of same observation
+                   List of hdus from same observation
+             hdu : An IRIS observation
+        save: Save the output files in the same directory as the input file with "rc" appended to the end of the file. Default is False
+        quiet: Suppress print outputs. Default False.
+    '''
 
-#################################################################
-
-rasdirec=ls(rass)
-rasdirec.sort()
-
-#Counts the number of independent observations
-observations=0
-date=None
-for i in range(0, len(rasdirec)):
-    if fits.open(rasdirec[i])[0].header['STARTOBS']!=date:
-        date=fits.open(rasdirec[i])[0].header['STARTOBS']
-        observations+=1
-        if fits.open(rasdirec[i])[0].header['TELESCOP']!='IRIS':
+    pathlistin=False
+    hdulistin=False
+    if type(ras)==fits.hdu.hdulist.HDUList:
+        if ras[0].header['TELESCOP']!='IRIS':
             raise AssertionError("Telescope is not IRIS")
+        rasfits=dc(ras)
 
-sets={}
-if observations>1:
-    print(str(observations)+' independent observations found.')
-    i=0 #Index of raster
-    j=0 #Set number
-    slstart=0
-    while i+2!=len(rasdirec):
-        while fits.open(rasdirec[i])[0].header['STARTOBS']==fits.open(rasdirec[i+1])[0].header['STARTOBS'] and i+2!=len(rasdirec):
-            i+=1
-        if i+2!=len(rasdirec):
-            slend=i+1
+    elif '*' in ras:
+        ras=ls(rass)
+        ras.sort()
+        if fits.open(ras[0]).header['TELESCOP']!='IRIS':
+            raise AssertionError("Telescope is not IRIS")
+        pathlistin=True
+
+    elif type(ras)==str:
+        try:
+            rasfits=fits.open(ras)
+            if rasfits[0].header['TELESCOP']!='IRIS':
+                raise AssertionError("Telescope is not IRIS")
+        except NameError:
+            raise RuntimeError("Must supply fits file or path to fits file or * directory for one set of observations")
+
+    elif type(ras)==list:
+        if type(ras[0])==fits.hdu.hdulist.HDUList:
+            if ras[0].header['TELESCOP']!='IRIS':
+                raise AssertionError("Telescope is not IRIS")
+            hdulistin=True
         else:
-            slend=i+2     
-        sets[str(j)]=rasdirec[slstart:slend]
-        slstart=slend
-        j+=1
-else:
-    sets['0']=dc(rasdirec)
+            try:
+                if fits.open(ras[0])[0].header['TELESCOP']!='IRIS':
+                    raise AssertionError("Telescope is not IRIS")
+                pathlistin=True
+            except NameError:
+                raise RuntimeError("Must supply fits file or * directory for one set of observations")
+    else:
+        raise RuntimeError("Must supply fits file or * directory for one set of observations")
 
-for z in range(0, len(sets)):
-    if observations>1:
-        print("Set "+str(z)+" of "+str(len(sets)))
-    rasdirec=sets[str(z)]
 
     ############
     # Response #
     ############
-    rasfits=fits.open(rasdirec[0])
+    if pathlistin:
+        rasfits=fits.open(ras[0])
+    elif hdulistin:
+        rasfits=ras[0]
+
     begin=dt.datetime.strptime(rasfits[0].header['STARTOBS'], '%Y-%m-%dT%H:%M:%S.%f')
     end=dt.datetime.strptime(rasfits[0].header['ENDOBS'], '%Y-%m-%dT%H:%M:%S.%f')
     midtime=dt.datetime.strftime((begin+((end-begin)/2)), '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -78,7 +90,7 @@ for z in range(0, len(sets)):
         NUVind=0
     else:
         print("[NAME_SG]="+str(response['NAME_SG']))
-        raise RuntimeError("FUV and NUV cannot be found automatically. Please check ['NAME_SG'] from irisresponse.sav above.")
+        raise RuntimeError("FUV and NUV cannot be found automatically. Please check ['NAME_SG'] from irisresponse above.")
 
     ##################################
     # Find where is what in the fits #
@@ -224,11 +236,20 @@ for z in range(0, len(sets)):
     ###########################
     # Radiometric Calibration #
     ###########################
-    print("Creating and saving calibrated spectrograph fits...")    
-    print("(This may take some time as it needs to recalculate the excessive amount of stats in the headers)")
+    if not quiet:
+        print("Creating and saving calibrated spectrograph fits...")    
+        print("(This may take some time as it needs to recalculate the excessive amount of stats in the headers)")
 
-    for k in tqdm(range(0, len(rasdirec))):
-        rasfits=fits.open(rasdirec[k])
+    if hdulistin or pathlistin:
+        end=len(ras)
+    else:
+        end=1
+    
+    for k in tqdm(range(0, end), disable=quiet):
+        if pathlistin:
+            rasfits=fits.open(ras[k])
+        elif hdulistin:
+            rasfits=ras[k]
 
         hdr0=dc(rasfits[0].header)
         hdr0['HISTORY']='Mgii, SiIV and CII radiometric calibration performed on '+dt.datetime.now().strftime("%Y-%m-%d")
@@ -294,5 +315,16 @@ for z in range(0, len(sets)):
         for key in indices:
             hduls.append(fits.ImageHDU(dat[key], header=hdrdict[key]))
         hdul=fits.HDUList(hduls)
-        hdul.writeto(rasdirec[k][:-5]+'_rc.fits')
-print("Done!")
+        if save:
+            hdul.writeto(ras[k][:-5]+'_rc.fits')
+        else:
+            if hdulistin or pathlistin:
+                if k!=0:
+                    callist.append(hdul)
+                elif k==0:
+                    callist=[hdul]
+                if k==end-1:
+                    return(callist)
+            return(hdul)
+
+    print("Done!")

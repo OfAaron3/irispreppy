@@ -3,27 +3,26 @@ import numpy as np
 from glob import glob as ls
 from IRIS_SG_deconvolve import *
 import pickle
-
+from tqdm import tqdm
+import concurrent.futures
 from copy import deepcopy as dc
 import scipy.stats as scist
-import concurrent.futures
-from tqdm import tqdm
+from os import cpu_count as cpus
 
-raspath='/home/aaron/Desktop/herc_dat/20191001/rc/*.fits'
-
-rasdirec=ls(raspath)
-rasdirec.sort()
-
-with open('IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
-    psfsin=pickle.load(psfpkl)
-
-psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}
+#There are two functions here
 
 
-# for i in tqdm(range(0, len(rasdirec))):
-#     rass=rasdirec[i]
-def ParDecon(rass, psfs):
-    rasfits=fits.open(rass)
+def ParDecon(rasfits, psfs, save=False):
+    '''Function acts as a wrapper around IRIS_SG_deconvolve
+    Input Paramteres: 
+        rasfits: The hdu to be deconvolved
+        psfs: The point spread functions in a dictionary
+        save: If True: Save the files with d appended
+              If False: Return the deconvolved hdus
+    Output:
+        If save=False: Deconcolved hdu
+        If save=True: 0
+    '''
     hdr0=dc(rasfits[0].header)
     nlines=rasfits[0].header['NEXP']
     indices={rasfits[0].header[name]: ind+1 for ind, name in enumerate(rasfits[0].header['TDESC*'])}
@@ -85,15 +84,91 @@ def ParDecon(rass, psfs):
         hduls.append(fits.ImageHDU(decondict[key], header=hdrdict[key]))
     hdul=fits.HDUList(hduls)  
 
-    if '_rc' in rass:
-        hdul.writeto(rass[:-8]+'_rd.fits')
+    if save:
+        hdul.writeto(rass[:-5]+'d.fits')
+        return(0)
     else:
-        hdul.writeto(rass[:-5]+'_decon.fits')
+        return(hdul)
 
 
-with concurrent.futures.ProcessPoolExecutor() as executor:
-    futures=[executor.submit(ParDecon, rass=rasdirec[i], psfs=psfs) for i in range(0, len(rasdirec))]
-    for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec)):
-        pass
-for f in enumerate(futures):
-    test=f[1].result() #Just to make sure nothing crashed
+def deconvolve(ras, quiet=False, save=False, limitcores=False):
+    '''Function prepares input to ParDecon
+    Input Paramteres: 
+        ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
+             String: Path to IRIS spectrograph file
+                     Path to IRIS files using wildcard (ie, /path/to/files/*fits) of same observation
+             List: List of paths to spectrograph file of same observation
+                   List of hdus from same observation
+             hdu : An IRIS observation
+        quiet: If True, suppress all print statements
+        save: If True: Save the files with d appended
+              If False: Return the deconvolved hdus
+        limitcores: If True: use all but one core. If False use all cores. 
+    Output:
+        If save=False: Deconcolved hdu(s). 
+        If save=True: 0
+    '''
+
+    nworkers=cpus()-int(limitcores)
+    pathlistin=False
+    hdulistin=False
+    if type(ras)==fits.hdu.hdulist.HDUList:
+        if ras[0].header['TELESCOP']!='IRIS':
+            raise AssertionError("Telescope is not IRIS")
+        rasfits=dc(ras)
+
+    elif '*' in ras:
+        ras=ls(rass)
+        ras.sort()
+        if fits.open(ras[0]).header['TELESCOP']!='IRIS':
+            raise AssertionError("Telescope is not IRIS")
+        pathlistin=True
+
+    elif type(ras)==str:
+        try:
+            rasfits=fits.open(ras)
+            if rasfits[0].header['TELESCOP']!='IRIS':
+                raise AssertionError("Telescope is not IRIS")
+        except NameError:
+            raise RuntimeError("Must supply fits file or path to fits file or * directory for one set of observations")
+
+    elif type(ras)==list:
+        if type(ras[0])==fits.hdu.hdulist.HDUList:
+            if ras[0].header['TELESCOP']!='IRIS':
+                raise AssertionError("Telescope is not IRIS")
+            hdulistin=True
+        else:
+            try:
+                if fits.open(ras[0])[0].header['TELESCOP']!='IRIS':
+                    raise AssertionError("Telescope is not IRIS")
+                pathlistin=True
+            except NameError:
+                raise RuntimeError("Must supply fits file or * directory for one set of observations")
+    else:
+        raise RuntimeError("Must supply fits file or * directory for one set of observations")
+
+
+    with open('IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
+        psfsin=pickle.load(psfpkl)
+    
+    psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
+
+    if pathlistin:
+        with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
+            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save) for i in range(0, len(ras))]
+            for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
+                pass 
+        out=[f for f in futures]
+    elif hdulistin:
+        with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
+            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save) for i in range(0, len(ras))]
+            for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
+                pass
+        out=[f for f in futures]
+    else:
+        out=ParDecon(rasfits=ras, psfs=psfs, save=save)
+    
+    if not save:
+        return(out)
+    else:
+        return(0)
