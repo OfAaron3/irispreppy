@@ -6,7 +6,7 @@ This has been a passion project of mine during my PhD. The radiometric calibrati
 
 These scripts should be general purpose and "just work". No janky hacks are present.
 
-Just need to write some scripts as functions and we're good to go.
+This remains untested on Windows.
 
 ---
 
