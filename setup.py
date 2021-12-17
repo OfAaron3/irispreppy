@@ -14,5 +14,6 @@ setup(name='irispreppy',
           'scipy',
           'bs4'
       ],
+      include_package_data=True,
       zip_safe=False
 )
