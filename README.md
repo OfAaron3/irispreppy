@@ -8,6 +8,8 @@ These scripts should be general purpose and "just work". No janky hacks are pres
 
 This remains untested on Windows and Mac. However, I expect it to work on UNIX-like OSes.
 
+---
+
 I'm having pypi issues that I don't intend to solve until after the holidays, so, to install run,
 
 `pip install git+git://GitHub.com/OfAaron3/irispreppy.git`
