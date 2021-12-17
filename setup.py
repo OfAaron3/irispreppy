@@ -6,7 +6,7 @@ setup(name='irispreppy',
       author='Aaron W. Peat',
       author_email='a.peat.1@research.gla.ac.uk',
       license='MIT',
-      packages=['irispreppy.psf', 'irispreppy.radcal'],
+      packages=['irispreppy.psf', 'irispreppy.radcal', 'irispreppy'],
       install_requires=[
           'numpy',
           'tqdm',
