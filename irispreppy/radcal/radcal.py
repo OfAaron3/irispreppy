@@ -8,7 +8,7 @@ from copy import deepcopy as dc
 from scipy.interpolate import interp1d
 import scipy.stats as scist
 from tqdm import tqdm
-import iris_get_response as igr
+from . import iris_get_response as igr
 
 #################################################################
 
@@ -30,39 +30,34 @@ def radcal(ras, save=False, quiet=False):
     pathlistin=False
     hdulistin=False
     if type(ras)==fits.hdu.hdulist.HDUList:
-        if ras[0].header['TELESCOP']!='IRIS':
-            raise AssertionError("Telescope is not IRIS")
+        assert ras[0].header['TELESCOP']=='IRIS'
         rasfits=dc(ras)
 
     elif '*' in ras:
         ras=ls(rass)
         ras.sort()
-        if fits.open(ras[0]).header['TELESCOP']!='IRIS':
-            raise AssertionError("Telescope is not IRIS")
+        assert fits.open(ras[0]).header['TELESCOP']=='IRIS'
         pathlistin=True
 
     elif type(ras)==str:
         try:
             rasfits=fits.open(ras)
-            if rasfits[0].header['TELESCOP']!='IRIS':
-                raise AssertionError("Telescope is not IRIS")
+            assert rasfits[0].header['TELESCOP']=='IRIS'
         except NameError:
-            raise RuntimeError("Must supply fits file or path to fits file or * directory for one set of observations")
+            raise ValueError("Must supply fits file or path to fits file or * directory for one set of observations")
 
     elif type(ras)==list:
         if type(ras[0])==fits.hdu.hdulist.HDUList:
-            if ras[0].header['TELESCOP']!='IRIS':
-                raise AssertionError("Telescope is not IRIS")
+            assert ras[0].header['TELESCOP']=='IRIS'
             hdulistin=True
         else:
             try:
-                if fits.open(ras[0])[0].header['TELESCOP']!='IRIS':
-                    raise AssertionError("Telescope is not IRIS")
+                assert fits.open(ras[0])[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
             except NameError:
-                raise RuntimeError("Must supply fits file or * directory for one set of observations")
+                raise ValueError("Must supply fits file or * directory for one set of observations")
     else:
-        raise RuntimeError("Must supply fits file or * directory for one set of observations")
+        raise ValueError("Must supply fits file or * directory for one set of observations")
 
 
     ############

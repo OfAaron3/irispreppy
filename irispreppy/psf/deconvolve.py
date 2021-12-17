@@ -1,7 +1,7 @@
 from astropy.io import fits
 import numpy as np
 from glob import glob as ls
-from IRIS_SG_deconvolve import *
+from . import IRIS_SG_deconvolve as isd
 import pickle
 from tqdm import tqdm
 import concurrent.futures
@@ -33,7 +33,7 @@ def ParDecon(rasfits, psfs, save=False):
         psfind=rasfits[0].header['TDET'+str(indices[key])]
         hdrdict[key]=dc(rasfits[indices[key]].header)
         for j in range(0, nlines):
-            decondict[key][j]=IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
+            decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
 
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(decondict[key])
@@ -113,39 +113,34 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
     pathlistin=False
     hdulistin=False
     if type(ras)==fits.hdu.hdulist.HDUList:
-        if ras[0].header['TELESCOP']!='IRIS':
-            raise AssertionError("Telescope is not IRIS")
+        assert ras[0].header['TELESCOP']=='IRIS'
         rasfits=dc(ras)
 
     elif '*' in ras:
         ras=ls(rass)
         ras.sort()
-        if fits.open(ras[0]).header['TELESCOP']!='IRIS':
-            raise AssertionError("Telescope is not IRIS")
+        assert fits.open(ras[0]).header['TELESCOP']=='IRIS'
         pathlistin=True
 
     elif type(ras)==str:
         try:
             rasfits=fits.open(ras)
-            if rasfits[0].header['TELESCOP']!='IRIS':
-                raise AssertionError("Telescope is not IRIS")
+            assert rasfits[0].header['TELESCOP']=='IRIS'
         except NameError:
-            raise RuntimeError("Must supply fits file or path to fits file or * directory for one set of observations")
+            raise ValueError("Must supply fits file or path to fits file or * directory for one set of observations")
 
     elif type(ras)==list:
         if type(ras[0])==fits.hdu.hdulist.HDUList:
-            if ras[0].header['TELESCOP']!='IRIS':
-                raise AssertionError("Telescope is not IRIS")
+            assert ras[0].header['TELESCOP']=='IRIS'
             hdulistin=True
         else:
             try:
-                if fits.open(ras[0])[0].header['TELESCOP']!='IRIS':
-                    raise AssertionError("Telescope is not IRIS")
+                assert fits.open(ras[0])[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
             except NameError:
-                raise RuntimeError("Must supply fits file or * directory for one set of observations")
+                raise ValueError("Must supply fits file or * directory for one set of observations")
     else:
-        raise RuntimeError("Must supply fits file or * directory for one set of observations")
+        raise ValueError("Must supply fits file or * directory for one set of observations")
 
 
     with open('IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
