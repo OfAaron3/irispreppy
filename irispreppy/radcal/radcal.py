@@ -12,7 +12,7 @@ from . import iris_get_response as igr
 
 #################################################################
 
-def radcal(ras, save=False, quiet=False):
+def radcal(ras, save=False, quiet=True):
     '''Radiometric Calibration of IRIS files
     Input Paramaters:
         ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
@@ -24,7 +24,7 @@ def radcal(ras, save=False, quiet=False):
         save: Save the output files in the same directory as the input file with "rc" appended to the end of the file. Default is False
               If True: Saves radiometrically calibrated files in the same directory as the input file with "rc" appended to the end of the filename. Does not return radiometrically calibrated hduls
               If False: Does exact opposite of True case. Does not save, and does return radiometrically calibrated hduls
-        quiet: Suppress print outputs. Default False.
+        quiet: Suppress print outputs. Default True.
     '''
 
     pathlistin=False
@@ -319,9 +319,12 @@ def radcal(ras, save=False, quiet=False):
                 if k!=0:
                     callist.append(hdul)
                 elif k==0:
-                    callist=[hdul]
-                if k==end-1:
-                    return(callist)
-            return(hdul)
+                    callist=[hdul]                
+            
     if not quiet:
         print("Done!")
+
+    if hdulistin or pathlistin:
+        return(callist)
+    else:
+        return(hdul)
