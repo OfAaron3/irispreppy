@@ -8,6 +8,7 @@ import concurrent.futures
 from copy import deepcopy as dc
 import scipy.stats as scist
 from os import cpu_count as cpus
+from os import path
 
 #There are two functions here
 
@@ -142,8 +143,8 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
     else:
         raise ValueError("Must supply fits file or * directory for one set of observations")
 
-
-    with open('IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
+    toppath=path.dirname(path.realpath(__file__))
+    with open(toppath+'/IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
         psfsin=pickle.load(psfpkl)
     
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
