@@ -18,7 +18,7 @@ I'm having pypi issues that I don't intend to solve until after the holidays, so
 
 Usage
 
-irispreppy can take lists of HDU objects, lists of a directory links to fits, or single HDU objects. For example,
+irispreppy can take a list of HDU objects, a list of a directory paths to fits, or single HDU objects. For example,
 
 ```python
 from astropy.io import fits
