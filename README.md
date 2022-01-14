@@ -24,11 +24,11 @@ irispreppy can take lists of HDU objects, lists of a directory links to fits, or
 from astropy.io import fits
 import irispreppy as ip
 
-raw=fits.open("path/to/file.fits")
-rc=ip.radcal(raw)
-rc_d=ip.deconvolve(rc)
+raw=fits.open("path/to/file.fits") #Raw data
+rc=ip.radcal(raw)		   #Radiometrically calibrated
+rc_d=ip.deconvolve(rc)		   #Radiometrically calibrated and deconvolced
 ```
-rc will be radiometrically calibrated, and rc_d will be both radiometrically calibrated and deconvolved
+
 ---
 
 iris_get_response.pro translated by Aaron W. Peat.<br>
