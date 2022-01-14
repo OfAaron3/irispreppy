@@ -31,14 +31,6 @@ rc_d=ip.deconvolve(rc)		   #Radiometrically calibrated and deconvolved
 
 ---
 
-iris_get_response.pro translated by Aaron W. Peat.<br>
-fit_iris_xput.pro translated by Aaron W. Peat.<br>
-radcal.py authored by Aaron W. Peat<br>
-deconvolve.py authored by Aaron W. Peat<br>
-
-IRIS_SG_deconvolve.py authored by Dr Graham S. Kerr.<br>
-IRIS_SG_PSFs.pkl supplied by Dr Graham S. Kerr.
-
----
+Thank you to Dr Graham S. Kerr for IRIS_SG_deconvolve.py and IRIS_SG_PSFs.pkl.
 
 Special thanks to Dr C.M.J. Osborne (https://github.com/Goobley) for putting up with my incessant and innane questions.
