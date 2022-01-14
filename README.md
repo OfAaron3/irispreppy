@@ -26,7 +26,8 @@ import irispreppy as ip
 
 raw=fits.open("path/to/file.fits")
 rc=ip.radcal(raw)
-rc_d=ip.deconvolve(rc) ```
+rc_d=ip.deconvolve(rc)
+```
 
 rc will be radiometrically calibrated, and rc_d will be both radiometrically calibrated and deconvolved
 ---
