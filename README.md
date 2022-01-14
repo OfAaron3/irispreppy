@@ -16,6 +16,21 @@ I'm having pypi issues that I don't intend to solve until after the holidays, so
 
 ---
 
+Usage
+
+irispreppy can take lists of HDU objects, lists of a directory links to fits, or single HDU objects. For example,
+
+```python
+from astropy.io import fits
+import irispreppy as ip
+
+raw=fits.open("path/to/file.fits")
+rc=ip.radcal(raw)
+rc_d=ip.deconvolve(rc) ```
+
+rc will be radiometrically calibrated, and rc_d will be both radiometrically calibrated and deconvolved
+---
+
 iris_get_response.pro translated by Aaron W. Peat.<br>
 fit_iris_xput.pro translated by Aaron W. Peat.<br>
 radcal.py authored by Aaron W. Peat<br>
