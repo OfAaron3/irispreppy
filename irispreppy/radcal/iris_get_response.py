@@ -277,7 +277,7 @@ if __name__=="__main__":
     #When script is called directly, it just looks for new response files#
     toppath=path.dirname(path.realpath(__file__))
     resppath=path.join(toppath, "responses")
-    resps=ls(path.join(resppath, "*.pkl*"))
+    resps=ls(path.join(resppath, "*.pkl"))
     resps.sort()
     new=False
     with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
