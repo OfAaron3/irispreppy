@@ -43,7 +43,6 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
     for tags in htmlsoup.find_all('a'):
         href=tags.get('href')
         if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
-            new=True
             print("New response file found, "+href+'.\nDownloading...')
             urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/iris_sra_c_20200223.geny", "temp.geny")
             newgeny=readsav('temp.geny')
