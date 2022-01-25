@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='irispreppy',
-      version=0.9,
+      version=0.9.1,
       url='https://github.com/OfAaron3/irispreppy',
       author='Aaron W. Peat',
       author_email='a.peat.1@research.gla.ac.uk',
