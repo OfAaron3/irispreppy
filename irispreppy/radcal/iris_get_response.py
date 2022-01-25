@@ -34,7 +34,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
 
     toppath=path.dirname(path.realpath(__file__))
     resppath=path.join(toppath, "responses")
-    resps=ls(path.join(resppath, "*.*"))
+    resps=ls(path.join(resppath, "*.pkl"))
     resps.sort()
 
     #Checks for new responses everytime it is run
@@ -277,7 +277,7 @@ if __name__=="__main__":
     #When script is called directly, it just looks for new response files#
     toppath=path.dirname(path.realpath(__file__))
     resppath=path.join(toppath, "responses")
-    resps=ls(path.join(resppath, "*.*"))
+    resps=ls(path.join(resppath, "*.pkl*"))
     resps.sort()
     new=False
     with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
