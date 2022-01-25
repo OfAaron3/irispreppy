@@ -44,7 +44,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         href=tags.get('href')
         if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
             print("New response file found, "+href+'.\nDownloading...')
-            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/iris_sra_c_20200223.geny", "temp.geny")
+            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
             newgeny=readsav('temp.geny')
             remove(geny)
             recgeny=newgeny[list(newgeny.keys())[0]][0]
@@ -288,7 +288,7 @@ if __name__=="__main__":
         if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
             new=True
             print("New response file found, "+href+'.\nDownloading...')
-            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/iris_sra_c_20200223.geny", "temp.geny")
+            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
             newgeny=readsav('temp.geny')
             remove(geny)
             recgeny=newgeny[list(newgeny.keys())[0]][0]
