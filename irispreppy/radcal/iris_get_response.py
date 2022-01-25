@@ -1,7 +1,7 @@
 from scipy.io import readsav
 from os import path
+from os import remove
 from glob import glob as ls
-from subprocess import call
 from datetime import datetime as dt
 import pickle
 import urllib.request
@@ -33,7 +33,8 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
     '''
 
     toppath=path.dirname(path.realpath(__file__))
-    resps=ls(toppath+"/responses/*.*")
+    resppath=path.join(toppath, "responses")
+    resps=ls(path.join(resppath, "*.*"))
     resps.sort()
 
     #Checks for new responses everytime it is run
@@ -41,11 +42,12 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         htmlsoup=BeautifulSoup(respurl, 'html.parser')
     for tags in htmlsoup.find_all('a'):
         href=tags.get('href')
-        if "sra" in href and toppath+'/responses/'+href[:-4]+'pkl' not in resps:
+        if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
+            new=True
             print("New response file found, "+href+'.\nDownloading...')
-            call("curl https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href+' -o temp.geny', shell=True)
-            newgeny=readsav('./temp.geny')
-            call('rm temp.geny', shell=True)
+            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/iris_sra_c_20200223.geny", "temp.geny")
+            newgeny=readsav('temp.geny')
+            remove(geny)
             recgeny=newgeny[list(newgeny.keys())[0]][0]
             with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                 pickle.dump(recgeny, pklout)
@@ -275,19 +277,21 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
 if __name__=="__main__":
     #When script is called directly, it just looks for new response files#
     toppath=path.dirname(path.realpath(__file__))
-    resps=ls(toppath+"/responses/*.*")
+    resppath=path.join(toppath, "responses")
+    resps=ls(path.join(resppath, "*.*"))
+    resps.sort()
     new=False
     with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
         htmlsoup=BeautifulSoup(respurl, 'html.parser')
     for tags in htmlsoup.find_all('a'):
         href=tags.get('href')
-        if "sra" in href and toppath+'/responses/'+href[:-4]+'pkl' not in resps:
+        print(href)
+        if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
             new=True
             print("New response file found, "+href+'.\nDownloading...')
-            call("curl https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href+' -o temp.geny', shell=True)
-            newgeny=readsav('./temp.geny')
-
-            call('rm temp.geny', shell=True)
+            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/iris_sra_c_20200223.geny", "temp.geny")
+            newgeny=readsav('temp.geny')
+            remove(geny)
             recgeny=newgeny[list(newgeny.keys())[0]][0]
             with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                 pickle.dump(recgeny, pklout)
