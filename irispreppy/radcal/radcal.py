@@ -12,7 +12,7 @@ from . import iris_get_response as igr
 
 #################################################################
 
-def radcal(ras, save=False, quiet=True):
+def radcal(ras, save=False, quiet=True, debug=False):
     '''Radiometric Calibration of IRIS files
     Input Paramaters:
         ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
@@ -313,6 +313,8 @@ def radcal(ras, save=False, quiet=True):
             hduls.append(fits.ImageHDU(dat[key], header=hdrdict[key]))
         hdul=fits.HDUList(hduls)
         if save:
+            if debug:
+                print(ras)
             hdul.writeto(ras[k][:-5]+'_rc.fits')
         else:
             if hdulistin or pathlistin:
