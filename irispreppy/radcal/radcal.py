@@ -313,9 +313,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
             hduls.append(fits.ImageHDU(dat[key], header=hdrdict[key]))
         hdul=fits.HDUList(hduls)
         if save:
-            if debug:
-                print(ras)
-            hdul.writeto(ras[k][:-5]+'_rc.fits')
+            hdul.writeto(ras[:-5]+'_rc.fits')
         else:
             if hdulistin or pathlistin:
                 if k!=0:
