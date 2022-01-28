@@ -86,7 +86,7 @@ def ParDecon(rasfits, psfs, save=False):
     hdul=fits.HDUList(hduls)  
 
     if save:
-        hdul.writeto(rass[:-5]+'d.fits')
+        hdul.writeto(rasfits.filename()[:-5]+'d.fits')
         return(0)
     else:
         return(hdul)
