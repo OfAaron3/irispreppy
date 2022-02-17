@@ -10,7 +10,7 @@ setup(name='irispreppy',
       install_requires=[
           'numpy',
           'tqdm',
-          'astropy',
+          'astropy<=4.2.0',
           'scipy',
           'bs4'
       ],
