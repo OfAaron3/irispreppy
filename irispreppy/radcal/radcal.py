@@ -1,13 +1,15 @@
-from astropy.io import fits
-import numpy as np
-from glob import glob as ls
 import datetime as dt
-from subprocess import call as bashrun
-from scipy.io import readsav
 from copy import deepcopy as dc
-from scipy.interpolate import interp1d
+from glob import glob as ls
+from subprocess import call as bashrun
+
+import numpy as np
 import scipy.stats as scist
+from astropy.io import fits
+from scipy.interpolate import interp1d
+from scipy.io import readsav
 from tqdm import tqdm
+
 from . import iris_get_response as igr
 
 #################################################################

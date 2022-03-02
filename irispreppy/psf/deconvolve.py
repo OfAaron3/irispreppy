@@ -1,14 +1,16 @@
-from astropy.io import fits
-import numpy as np
-from glob import glob as ls
-from . import IRIS_SG_deconvolve as isd
-import pickle
-from tqdm import tqdm
 import concurrent.futures
+import pickle
 from copy import deepcopy as dc
-import scipy.stats as scist
+from glob import glob as ls
 from os import cpu_count as cpus
 from os import path
+
+import numpy as np
+import scipy.stats as scist
+from astropy.io import fits
+from tqdm import tqdm
+
+from . import IRIS_SG_deconvolve as isd
 
 #There are two functions here
 

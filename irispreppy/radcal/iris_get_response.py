@@ -1,14 +1,15 @@
-from scipy.io import readsav
-from os import path
-from os import remove
-from glob import glob as ls
-from datetime import datetime as dt
 import pickle
 import urllib.request
-from bs4 import BeautifulSoup
-from astropy.time import Time
+from datetime import datetime as dt
+from glob import glob as ls
+from os import path, remove
+
 import numpy as np
+from astropy.time import Time
+from bs4 import BeautifulSoup
 from scipy.interpolate import interp1d
+from scipy.io import readsav
+
 
 def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), version=0, response_file=None, pre_launch=False, full=False, angstrom=False):
     '''Intended to use in place of iris_get_response.pro

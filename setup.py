@@ -12,7 +12,7 @@ setup(name='irispreppy',
           'tqdm',
           'astropy<=4.2.0',
           'scipy',
-          'bs4'
+          'beatifulsoup4'
       ],
       include_package_data=True,
       zip_safe=False
