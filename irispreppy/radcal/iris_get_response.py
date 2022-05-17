@@ -1,4 +1,5 @@
 import pickle
+import urllib.error
 import urllib.request
 from datetime import datetime as dt
 from glob import glob as ls
@@ -39,21 +40,24 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
     resps.sort()
 
     #Checks for new responses everytime it is run
-    with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
-        htmlsoup=BeautifulSoup(respurl, 'html.parser')
-    for tags in htmlsoup.find_all('a'):
-        href=tags.get('href')
-        if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
-            print("New response file found, "+href+'.\nDownloading...')
-            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
-            newgeny=readsav('temp.geny')
-            remove(geny)
-            recgeny=newgeny[list(newgeny.keys())[0]][0]
-            with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
-                pickle.dump(recgeny, pklout)
+    try:
+        with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
+            htmlsoup=BeautifulSoup(respurl, 'html.parser')
+        for tags in htmlsoup.find_all('a'):
+            href=tags.get('href')
+            if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
+                print("New response file found, "+href+'.\nDownloading...')
+                urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
+                newgeny=readsav('temp.geny')
+                remove(geny)
+                recgeny=newgeny[list(newgeny.keys())[0]][0]
+                with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
+                    pickle.dump(recgeny, pklout)
 
-            resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
-            resps.sort()
+                resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
+                resps.sort()
+    except urllib.error.URLError:
+        print("You are not connected to the internet. Cannot check for new reponse files.")
 
     #0a Opening correct file
     if pre_launch:
