@@ -57,7 +57,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
                 resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
                 resps.sort()
     except urllib.error.URLError:
-        print("You are not connected to the internet. Cannot check for new reponse files.")
+        print("You are not connected to the internet. Cannot check for new response files.")
 
     #0a Opening correct file
     if pre_launch:
