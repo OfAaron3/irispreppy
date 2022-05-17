@@ -1,5 +1,10 @@
 from setuptools import setup
 
+
+def readme():
+    with open("README.md", "r") as f:
+        return f.read()
+
 setup(name='irispreppy',
       version="0.9.2",
       url='https://github.com/OfAaron3/irispreppy',
@@ -15,5 +20,7 @@ setup(name='irispreppy',
           'beatifulsoup4'
       ],
       include_package_data=True,
-      zip_safe=False
+      zip_safe=False,
+      long_description=readme(),
+      long_description_content_type="text/markdown",
 )
