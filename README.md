@@ -10,12 +10,6 @@ This remains untested on Mac. However, I expect it to work on UNIX-like OSes.
 
 ---
 
-I'm having pypi issues that I don't intend to solve until after the holidays, so, to install run,
-
-`pip install git+git://GitHub.com/OfAaron3/irispreppy.git`
-
----
-
 Usage
 
 irispreppy can take a list of HDU objects, a list of a directory paths to fits, or single HDU objects. For example,
