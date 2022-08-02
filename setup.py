@@ -15,9 +15,9 @@ setup(name='irispreppy',
       install_requires=[
           'numpy',
           'tqdm',
-          'astropy<=4.2.0',
+          'astropy',
           'scipy',
-          'beatifulsoup4'
+          'beautifulsoup4'
       ],
       include_package_data=True,
       zip_safe=False,

@@ -147,7 +147,14 @@ def radcal(ras, save=False, quiet=True, debug=False):
     ###############
     #Exposure Time#
     ###############
-    texp=rasfits[0].header['EXPTIME']
+    if 'EXPTIMEN' in rasfits[0].header:
+        tnuv=rasfits[0].header['EXPTIMEN']
+    else:
+        tnuv=rasfits[0].header['EXPTIME']
+    if 'EXPTIMEF' in rasfits[0].header:
+        tfuv=rasfits[0].header['EXPTIMEF']
+    else:
+        tfuv=rasfits[0].header['EXPTIME']
 
     ############
     #Slit Width#
@@ -174,9 +181,9 @@ def radcal(ras, save=False, quiet=True, debug=False):
     const={}
     for key in indices:
         if rasfits[0].header['TDET'+str(indices[key])]=='FUV':
-            const[key]=d2pFUV/(pixxy[key]*pixl[key]*texp*wslit)
+            const[key]=d2pFUV/(pixxy[key]*pixl[key]*tfuv*wslit)
         else:
-            const[key]=d2pNUV/(pixxy[key]*pixl[key]*texp*wslit)
+            const[key]=d2pNUV/(pixxy[key]*pixl[key]*tnuv*wslit)
 
     ###############################################
     # Interpolating wavelength dependant function #
@@ -315,7 +322,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
             hduls.append(fits.ImageHDU(dat[key], header=hdrdict[key]))
         hdul=fits.HDUList(hduls)
         if save:
-            hdul.writeto(ras[:-5]+'_rc.fits')
+            hdul.writeto(rasfits.filename()[:-5]+'_rc.fits')
         else:
             if hdulistin or pathlistin:
                 if k!=0:
