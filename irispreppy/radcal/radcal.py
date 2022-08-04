@@ -258,7 +258,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
             rasfits=ras[k]
 
         hdr0=dc(rasfits[0].header)
-        hdr0['HISTORY']='Mgii, SiIV and CII radiometric calibration performed on '+dt.datetime.now().strftime("%Y-%m-%d")
+        hdr0['HISTORY']='NUV and FUV radiometric calibration performed on '+dt.datetime.now().strftime("%Y-%m-%d")
         hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
         hdr0['BUNIT']="erg s^-1 cm^-2 angstrom^-1 sr^-1"
         dat={}
