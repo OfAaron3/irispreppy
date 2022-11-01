@@ -237,7 +237,7 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     tt=Time(tt0).unix/yr2sec
     ntt=1 
     #Always going to be 1 in this instance. Script can, in theory, take more than one input.
-        
+         
     if ccc.size!=3*m:
         raise RuntimeError("Incorrect number of elements in tcoef (tcco)")
 
