@@ -225,7 +225,7 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     tex=1.5 # ; exponent for transition between exp.decay intervals
     if tcc0.shape[1]!=2:
         raise RuntimeError("Incorrect number of elements in tcoef (tcco)")
-    m=tcc0.shape[0]
+    m=tcc0.size//2
     #This is crazy. Originally here they did 
     #m=size(tcc0); if m[1] ne 2; return, 0; endif; m=m[m[0]+2]/2.
 
