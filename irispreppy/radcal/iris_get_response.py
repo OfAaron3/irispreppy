@@ -225,9 +225,9 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     tex=1.5 # ; exponent for transition between exp.decay intervals
     if tcc0.shape[1]!=2:
         raise RuntimeError("Incorrect number of elements in tcoef (tcco)")
-    m=tcc0.size//2
+    m=tcc0.shape[0]
     #This is crazy. Originally here they did 
-    #m=size(tcc0); m=m[m[0]+2]/2.
+    #m=size(tcc0); if m[1] ne 2; return, 0; endif; m=m[m[0]+2]/2.
 
     #; times in years since tcc[0,0]
     #The original is using NASA's epoch of 1979. I'm using 1970, as is standard.
