@@ -127,9 +127,9 @@ def radcal(ras, save=False, quiet=True, debug=False):
     #Lambda is in A. 1e7 ergs = 1 Joule
     h=6.62607004e-34
     c=3e8
-    eFUV1=1e7*h*c/(FUV1*1e-9)
-    eFUV2=1e7*h*c/(FUV2*1e-9)
-    eNUV=1e7*h*c/(NUV*1e-9)
+    eFUV1=1e7*h*c/(FUV1*1e-10)
+    eFUV2=1e7*h*c/(FUV2*1e-10)
+    eNUV=1e7*h*c/(NUV*1e-10)
 
     ##################
     # Effective Area #
