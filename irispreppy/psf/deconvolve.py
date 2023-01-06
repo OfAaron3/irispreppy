@@ -130,12 +130,9 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
             cdelt={}
             for i in range(1, ex[0].header['NWIN']+1):
                 if ex[0].header['TDET'+str(i)] not in cdelt:
-                    for j in range(1,4):
-                        if ex[i].header['CTYPE'+str(j)]=='WAVE':
-                            break
-                    cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT'+str(j)]
+                    cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT2']
                 else:
-                    assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT'+str(j)]
+                    assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT2']
 
     elif type(ras)==str:
         try:
@@ -144,12 +141,9 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
                 cdelt={}
                 for i in range(1, rasfits[0].header['NWIN']+1):
                     if rasfits[0].header['TDET'+str(i)] not in cdelt:
-                        for j in range(1,4):
-                            if rasfits[i].header['CTYPE'+str(j)]=='WAVE':
-                                break
-                        cdelt[rasfits[0].header['TDET'+str(i)]]=rasfits[i].header['CDELT'+str(j)]
+                        cdelt[rasfits[0].header['TDET'+str(i)]]=rasfits[i].header['CDELT2']
                     else:
-                        assert cdelt[rasfits[0].header['TDET'+str(i)]]==rasfits[i].header['CDELT'+str(j)]
+                        assert cdelt[rasfits[0].header['TDET'+str(i)]]==rasfits[i].header['CDELT2']
 
                     assert rasfits[0].header['TELESCOP']=='IRIS'
         except NameError:
@@ -163,12 +157,9 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
                 cdelt={}
                 for i in range(1, ras[0][0].header['NWIN']+1):
                     if ras[0][0].header['TDET'+str(i)] not in cdelt:
-                        for j in range(1,4):
-                            if ras[0][i].header['CTYPE'+str(j)]=='WAVE':
-                                break
-                        cdelt[ras[0][0].header['TDET'+str(i)]]=ras[0][i].header['CDELT'+str(j)]
+                        cdelt[ras[0][0].header['TDET'+str(i)]]=ras[0][i].header['CDELT2']
                     else:
-                        assert cdelt[ras[0][0].header['TDET'+str(i)]]==ras[0][i].header['CDELT'+str(j)]
+                        assert cdelt[ras[0][0].header['TDET'+str(i)]]==ras[0][i].header['CDELT2']
 
         else:
             try:
@@ -179,12 +170,9 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
                     cdelt={}
                     for i in range(1, ex[0].header['NWIN']+1):
                         if ex[0].header['TDET'+str(i)] not in cdelt:
-                            for j in range(1,4):
-                                if ex[i].header['CTYPE'+str(j)]=='WAVE':
-                                    break
-                            cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT'+str(j)]
+                            cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT2']
                         else:
-                            assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT'+str(j)]
+                            assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT2']
             except NameError:
                 raise ValueError("Must supply fits file or * directory for one set of observations")
     else:
