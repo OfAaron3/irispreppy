@@ -94,7 +94,7 @@ def ParDecon(rasfits, psfs, save=False):
         return(hdul)
 
 
-def deconvolve(ras, quiet=False, save=False, limitcores=False):
+def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
     '''Function prepares input to ParDecon
     Input Paramteres: 
         ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
@@ -112,6 +112,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
         If save=True: 0
     '''
 
+
     nworkers=cpus()-int(limitcores)
     pathlistin=False
     hdulistin=False
@@ -122,24 +123,68 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
     elif '*' in ras:
         ras=ls(rass)
         ras.sort()
-        assert fits.open(ras[0]).header['TELESCOP']=='IRIS'
+        ex=fits.open(ras[0]) #example
+        assert ex.header['TELESCOP']=='IRIS'
         pathlistin=True
+        if not cdelt:
+            cdelt={}
+            for i in range(1, ex[0].header['NWIN']+1):
+                if ex[0].header['TDET'+str(i)] not in cdelt:
+                    for j in range(1,4):
+                        if ex[i].header['CTYPE'+str(j)]=='WAVE':
+                            break
+                    cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT'+str(j)]
+                else:
+                    assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT'+str(j)]
 
     elif type(ras)==str:
         try:
             rasfits=fits.open(ras)
-            assert rasfits[0].header['TELESCOP']=='IRIS'
+            if not cdelt:
+                cdelt={}
+                for i in range(1, rasfits[0].header['NWIN']+1):
+                    if rasfits[0].header['TDET'+str(i)] not in cdelt:
+                        for j in range(1,4):
+                            if rasfits[i].header['CTYPE'+str(j)]=='WAVE':
+                                break
+                        cdelt[rasfits[0].header['TDET'+str(i)]]=rasfits[i].header['CDELT'+str(j)]
+                    else:
+                        assert cdelt[rasfits[0].header['TDET'+str(i)]]==rasfits[i].header['CDELT'+str(j)]
+
+                    assert rasfits[0].header['TELESCOP']=='IRIS'
         except NameError:
             raise ValueError("Must supply fits file or path to fits file or * directory for one set of observations")
 
     elif type(ras)==list:
         if type(ras[0])==fits.hdu.hdulist.HDUList:
-            assert ras[0].header['TELESCOP']=='IRIS'
+            assert ras[0][0].header['TELESCOP']=='IRIS'
             hdulistin=True
+            if not cdelt:
+                cdelt={}
+                for i in range(1, ras[0][0].header['NWIN']+1):
+                    if ras[0][0].header['TDET'+str(i)] not in cdelt:
+                        for j in range(1,4):
+                            if ras[0][i].header['CTYPE'+str(j)]=='WAVE':
+                                break
+                        cdelt[ras[0][0].header['TDET'+str(i)]]=ras[0][i].header['CDELT'+str(j)]
+                    else:
+                        assert cdelt[ras[0][0].header['TDET'+str(i)]]==ras[0][i].header['CDELT'+str(j)]
+
         else:
             try:
-                assert fits.open(ras[0])[0].header['TELESCOP']=='IRIS'
+                ex=fits.open(ras[0])
+                assert ex[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
+                if not cdelt:
+                    cdelt={}
+                    for i in range(1, ex[0].header['NWIN']+1):
+                        if ex[0].header['TDET'+str(i)] not in cdelt:
+                            for j in range(1,4):
+                                if ex[i].header['CTYPE'+str(j)]=='WAVE':
+                                    break
+                            cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT'+str(j)]
+                        else:
+                            assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT'+str(j)]
             except NameError:
                 raise ValueError("Must supply fits file or * directory for one set of observations")
     else:
@@ -150,6 +195,15 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
         psfsin=pickle.load(psfpkl)
     
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
+
+    for psfn in cddelt:
+        psf=psfs[psfn]
+        psfx=np.arange(0, len(psf))/6
+        datx=np.arange(0, psfx[-1], cdelt[psfn])
+        newpsf=np.interp(datx, psfx, psf)
+        psfi=np.trapz(newpsf, datx)
+        newpsf=newpsf/psfi
+        psfs[psfn]=newpsf
 
     if pathlistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
