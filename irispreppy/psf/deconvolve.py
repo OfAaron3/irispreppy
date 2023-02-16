@@ -15,7 +15,7 @@ from . import IRIS_SG_deconvolve as isd
 #There are two functions here
 
 
-def ParDecon(rasfits, psfs, save=False):
+def ParDecon(rasfits, psfs, save=False, cdelts=None):
     '''Function acts as a wrapper around IRIS_SG_deconvolve
     Input Paramteres: 
         rasfits: The hdu to be deconvolved
@@ -35,8 +35,12 @@ def ParDecon(rasfits, psfs, save=False):
         decondict[key]=np.zeros_like(rasfits[indices[key]].data)
         psfind=rasfits[0].header['TDET'+str(indices[key])]
         hdrdict[key]=dc(rasfits[indices[key]].header)
+        if not cdelts:
+            dy=1
+        else:
+            dy=cdelts[psfind]
         for j in range(0, nlines):
-            decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
+            decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True, dy=dy)
 
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(decondict[key])
@@ -184,7 +188,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
     
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-    for psfn in cddelt:
+    for psfn in cdelt:
         psf=psfs[psfn]
         psfx=np.arange(0, len(psf))/6
         datx=np.arange(0, psfx[-1], cdelt[psfn])
@@ -195,13 +199,13 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
 
     if pathlistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save) for i in range(0, len(ras))]
+            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save, cdelts=cdelt) for i in range(0, len(ras))]
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
                 pass 
         out=[f for f in futures]
     elif hdulistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save) for i in range(0, len(ras))]
+            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save, cdelts=cdelt) for i in range(0, len(ras))]
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
                 pass
         out=[f for f in futures]
