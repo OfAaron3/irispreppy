@@ -26,7 +26,7 @@ rc_d=ip.deconvolve(rc)		   #Radiometrically calibrated and deconvolved
 ```
 
 ---
-More in dpeth documentation will be added in the future.
+More in depth documentation will be added in the future.
 
 Thank you to Dr Graham S. Kerr for IRIS_SG_deconvolve.py and IRIS_SG_PSFs.pkl.
 
