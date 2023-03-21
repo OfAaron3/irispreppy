@@ -35,6 +35,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
         if 'TELESCOP' not in ras[0].header:
             if not quiet:
                 print("Telescope keyword not present. Assuming full disc mosaic.")
+            rasfits=dc(ras)
         else:
             assert ras[0].header['TELESCOP']=='IRIS'
             rasfits=dc(ras)
@@ -45,6 +46,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
         if 'TELESCOP' not in ras[0].header:
             if not quiet:
                 print("Telescope keyword not present. Assuming full disc mosaic.")
+            pathlistin=True
         else:
             assert fits.open(ras[0]).header['TELESCOP']=='IRIS'
             pathlistin=True
@@ -65,6 +67,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
             if 'TELESCOP' not in ras[0].header:
                 if not quiet:
                     print("Telescope keyword not present. Assuming full disc mosaic.")
+                hdulistin=True
             else:
                 assert ras[0].header['TELESCOP']=='IRIS'
                 hdulistin=True
@@ -74,6 +77,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 if 'TELESCOP' not in rasfits[0].header:
                     if not quiet:
                         print("Telescope keyword not present. Assuming full disc mosaic.")
+                    pathlistin=True
                 else:
                     assert rasfits[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
