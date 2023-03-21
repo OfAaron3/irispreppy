@@ -103,7 +103,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
         end=dt.datetime.strptime(rasfits[0].header['DATE_END'], '%Y-%m-%dT%H:%M:%S.%f')
     else:
         end=dt.datetime.strptime(rasfits[0].header['ENDOBS'], '%Y-%m-%dT%H:%M:%S.%f')
-        
+
     midtime=dt.datetime.strftime((begin+((end-begin)/2)), '%Y-%m-%dT%H:%M:%S.%fZ')
 
     response=(igr.iris_get_response(midtime))[0]
@@ -247,7 +247,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
     rcfs={} #Radiometric Calibration FactorS
     for key in indices:
         if key=='FUV':
-            wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS1']), rasfits[indices[key]].header['CRPIX1']-1), rasfits[indices[key]].header['CDELT1']), rasfits[indices[key]].header['CRVAL1'])
+            wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS3']), rasfits[indices[key]].header['CRPIX3']-1), rasfits[indices[key]].header['CDELT3']), rasfits[indices[key]].header['CRVAL3'])
             lamwin[key]=[-1, -1]
             for ind, wvln in enumerate(wvlns[key]):
                 if wvln>=FUV1[0] and lamwin[key][0]==-1:
@@ -257,7 +257,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                     break
             rcfs[key]=f_FUV1(wvlns[key][lamwin[key][0]:lamwin[key][1]])*const[key]
         elif key=='NUV':
-            wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS1']), rasfits[indices[key]].header['CRPIX1']-1), rasfits[indices[key]].header['CDELT1']), rasfits[indices[key]].header['CRVAL1'])
+            wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS3']), rasfits[indices[key]].header['CRPIX3']-1), rasfits[indices[key]].header['CDELT3']), rasfits[indices[key]].header['CRVAL3'])
             lamwin[key]=[-1, -1]
             for ind, wvln in enumerate(wvlns[key]):
                 if wvln>=NUV[0] and lamwin[key][0]==-1:
