@@ -368,6 +368,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 hdrdict[key]['CRVAL3']=wvlns[key][lamwin[key][0]]
                 hdrdict[key]['NAXIS3']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
+
         if key!='NUV' and key!='FUV': #Full disc
             for ind, key in enumerate(dat):
                 if ind==0:
