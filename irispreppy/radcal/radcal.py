@@ -333,13 +333,13 @@ def radcal(ras, save=False, quiet=True, debug=False):
 
         for key in indices: 
             dat[key]=dc(rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]])
-            for ind, _ in np.ndenumerate(dat[key][...,0]):
-                dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
-            hdrdict[key]=dc(rasfits[indices[key]].header)
-            hdrdict[key]['CRVAL1']=wvlns[key][lamwin[key][0]]
-            hdrdict[key]['NAXIS1']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
-            if key!='NUV' and key!='FUV': #Full disc
+            if key!='NUV' and key!='FUV': #Not full disc
+                for ind, _ in np.ndenumerate(dat[key][...,0]):
+                    dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
+                hdrdict[key]=dc(rasfits[indices[key]].header)
+                hdrdict[key]['CRVAL1']=wvlns[key][lamwin[key][0]]
+                hdrdict[key]['NAXIS1']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
                 hdr0['TWMIN'+str(indices[key])]=wvlns[key][lamwin[key][0]]
                 hdr0['TWMAX'+str(indices[key])]=wvlns[key][lamwin[key][1]]
@@ -361,6 +361,12 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 hdr0['TDP98_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.98))]
                 hdr0['TDP99_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.99))]
                 del flatdat
+            else:
+                for ind, _ in np.ndenumerate(dat[key][0]):
+                    dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
+                hdrdict[key]=dc(rasfits[indices[key]].header)
+                hdrdict[key]['CRVAL3']=wvlns[key][lamwin[key][0]]
+                hdrdict[key]['NAXIS3']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
         if key!='NUV' and key!='FUV': #Full disc
             for ind, key in enumerate(dat):
