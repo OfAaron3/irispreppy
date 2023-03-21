@@ -204,7 +204,10 @@ def radcal(ras, save=False, quiet=True, debug=False):
     #Spectral Pixel Width [angstroms]#
     ##################################
 
-    pixl={key: rasfits[indices[key]].header['CDELT1'] for key in indices}
+    if 'NUV' in indices or 'FUV' in indices:
+        pixl={key: rasfits[indices[key]].header['CDELT3'] for key in indices}
+    else:
+        pixl={key: rasfits[indices[key]].header['CDELT1'] for key in indices}
 
     ##############################
     #Spatial Pixel Size [radians]#
