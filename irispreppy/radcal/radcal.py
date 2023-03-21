@@ -32,29 +32,50 @@ def radcal(ras, save=False, quiet=True, debug=False):
     pathlistin=False
     hdulistin=False
     if type(ras)==fits.hdu.hdulist.HDUList:
-        assert ras[0].header['TELESCOP']=='IRIS'
-        rasfits=dc(ras)
+        if 'TELESCOP' not in ras[0].header:
+            if not quiet:
+                print("Telescope keyword not present. Assuming full disc mosaic.")
+        else:
+            assert ras[0].header['TELESCOP']=='IRIS'
+            rasfits=dc(ras)
 
     elif '*' in ras:
         ras=ls(rass)
         ras.sort()
-        assert fits.open(ras[0]).header['TELESCOP']=='IRIS'
-        pathlistin=True
+        if 'TELESCOP' not in ras[0].header:
+            if not quiet:
+                print("Telescope keyword not present. Assuming full disc mosaic.")
+        else:
+            assert fits.open(ras[0]).header['TELESCOP']=='IRIS'
+            pathlistin=True
 
     elif type(ras)==str:
         try:
             rasfits=fits.open(ras)
-            assert rasfits[0].header['TELESCOP']=='IRIS'
+            if 'TELESCOP' not in rasfits[0].header:
+                if not quiet:
+                    print("Telescope keyword not present. Assuming full disc mosaic.")
+            else:
+                assert rasfits[0].header['TELESCOP']=='IRIS'
         except NameError:
             raise ValueError("Must supply fits file or path to fits file or * directory for one set of observations")
 
     elif type(ras)==list:
         if type(ras[0])==fits.hdu.hdulist.HDUList:
-            assert ras[0].header['TELESCOP']=='IRIS'
-            hdulistin=True
+            if 'TELESCOP' not in ras[0].header:
+                if not quiet:
+                    print("Telescope keyword not present. Assuming full disc mosaic.")
+            else:
+                assert ras[0].header['TELESCOP']=='IRIS'
+                hdulistin=True
         else:
             try:
-                assert fits.open(ras[0])[0].header['TELESCOP']=='IRIS'
+                rasfits=fits.open(ras[0])
+                if 'TELESCOP' not in rasfits[0].header:
+                    if not quiet:
+                        print("Telescope keyword not present. Assuming full disc mosaic.")
+                else:
+                    assert rasfits[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
             except NameError:
                 raise ValueError("Must supply fits file or * directory for one set of observations")
@@ -70,7 +91,6 @@ def radcal(ras, save=False, quiet=True, debug=False):
     elif hdulistin:
         rasfits=ras[0]
 
-    begin=dt.datetime.strptime(rasfits[0].header['STARTOBS'], '%Y-%m-%dT%H:%M:%S.%f')
     end=dt.datetime.strptime(rasfits[0].header['ENDOBS'], '%Y-%m-%dT%H:%M:%S.%f')
     midtime=dt.datetime.strftime((begin+((end-begin)/2)), '%Y-%m-%dT%H:%M:%S.%fZ')
 
@@ -96,6 +116,13 @@ def radcal(ras, save=False, quiet=True, debug=False):
     ##################################
 
     indices={rasfits[0].header[name]: ind+1 for ind, name in enumerate(rasfits[0].header['TDESC*'])}
+
+    if indices=={}:
+        #Full disc mosaic
+        if rasfits[0].header['CRVAL3']>2000:
+            indices={'NUV':0}
+        else:
+            indices={'FUV':0}    
 
     ###################
     # Wavelength axes #
@@ -180,7 +207,11 @@ def radcal(ras, save=False, quiet=True, debug=False):
 
     const={}
     for key in indices:
-        if rasfits[0].header['TDET'+str(indices[key])]=='FUV':
+        if key=='FUV':
+            const[key]=d2pFUV/(pixxy[key]*pixl[key]*tfuv*wslit)
+        elif key=='NUV':
+                const[key]=d2pNUV/(pixxy[key]*pixl[key]*tnuv*wslit)
+        elif rasfits[0].header['TDET'+str(indices[key])]=='FUV':
             const[key]=d2pFUV/(pixxy[key]*pixl[key]*tfuv*wslit)
         else:
             const[key]=d2pNUV/(pixxy[key]*pixl[key]*tnuv*wslit)
@@ -203,7 +234,28 @@ def radcal(ras, save=False, quiet=True, debug=False):
     wvlns={}
     rcfs={} #Radiometric Calibration FactorS
     for key in indices:
-        if rasfits[0].header['TDET'+str(indices[key])]=='FUV1':
+        if key=='FUV':
+            wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS1']), rasfits[indices[key]].header['CRPIX1']-1), rasfits[indices[key]].header['CDELT1']), rasfits[indices[key]].header['CRVAL1'])
+            lamwin[key]=[-1, -1]
+            for ind, wvln in enumerate(wvlns[key]):
+                if wvln>=FUV1[0] and lamwin[key][0]==-1:
+                    lamwin[key][0]=ind
+                elif wvln>FUV1[-1] and lamwin[key][1]==-1:
+                    lamwin[key][1]=ind-1
+                    break
+            rcfs[key]=f_FUV1(wvlns[key][lamwin[key][0]:lamwin[key][1]])*const[key]
+        elif key=='NUV':
+            wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS1']), rasfits[indices[key]].header['CRPIX1']-1), rasfits[indices[key]].header['CDELT1']), rasfits[indices[key]].header['CRVAL1'])
+            lamwin[key]=[-1, -1]
+            for ind, wvln in enumerate(wvlns[key]):
+                if wvln>=NUV[0] and lamwin[key][0]==-1:
+                    lamwin[key][0]=ind
+                elif wvln>NUV[-1] and lamwin[key][1]==-1:
+                    lamwin[key][1]=ind-1
+                    break
+            rcfs[key]=f_NUV(wvlns[key][lamwin[key][0]:lamwin[key][1]])*const[key]
+
+        elif rasfits[0].header['TDET'+str(indices[key])]=='FUV1':
             wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS1']), rasfits[indices[key]].header['CRPIX1']-1), rasfits[indices[key]].header['CDELT1']), rasfits[indices[key]].header['CRVAL1'])
             lamwin[key]=[-1, -1]
             for ind, wvln in enumerate(wvlns[key]):
@@ -272,54 +324,64 @@ def radcal(ras, save=False, quiet=True, debug=False):
             hdrdict[key]['CRVAL1']=wvlns[key][lamwin[key][0]]
             hdrdict[key]['NAXIS1']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
-            hdr0['TWMIN'+str(indices[key])]=wvlns[key][lamwin[key][0]]
-            hdr0['TWMAX'+str(indices[key])]=wvlns[key][lamwin[key][1]]
-            hdr0['TDMEAN'+str(indices[key])]=np.mean(dat[key])
-            hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((dat[key]-np.mean(dat[key]))**2)/dat[key].size)
-            hdr0['TDMEDN'+str(indices[key])]=np.median(dat[key])
-            hdr0['TDMIN'+str(indices[key])]=np.min(dat[key])
-            hdr0['TDMAX'+str(indices[key])]=np.max(dat[key])
-            hdr0['TDSKEW'+str(indices[key])]=scist.skew(dat[key], axis=None)
-            hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(dat[key], axis=None)
-            
-            flatdat=np.sort(dat[key].flatten())
-            hdr0['TDP01_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.01))]
-            hdr0['TDP10_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.1))]
-            hdr0['TDP25_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.25))]
-            hdr0['TDP75_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.75))]
-            hdr0['TDP90_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.9))]
-            hdr0['TDP95_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.95))]
-            hdr0['TDP98_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.98))]
-            hdr0['TDP99_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.99))]
-            del flatdat
+            if key!='NUV' and key!='FUV': #Full disc
 
-        for ind, key in enumerate(dat):
-            if ind==0:
-                dattot=dat[key] #Needed for header stuff. (DATa TOTal)
-            else:
-                dattot=np.concatenate((dattot, dat[key]), axis=2)
-        hdr0['DATAMEAN']=np.mean(dattot)
-        hdr0['DATARMS']=np.sqrt(np.sum((dattot-np.mean(dattot))**2)/dattot.size)
-        hdr0['DATAMEDN']=np.median(dattot)
-        hdr0['DATAMIN']=np.min(dattot)
-        hdr0['DATAMAX']=np.max(dattot)
-        hdr0['DATASKEW']=scist.skew(dattot, axis=None)
-        hdr0['DATAKURT']=scist.kurtosis(dattot, axis=None)
-        flatdattot=np.sort(dattot.flatten())
-        hdr0['DATAP01']=flatdattot[int(np.round(len(flatdattot)*0.01))]
-        hdr0['DATAP10']=flatdattot[int(np.round(len(flatdattot)*0.1))]
-        hdr0['DATAP25']=flatdattot[int(np.round(len(flatdattot)*0.25))]
-        hdr0['DATAP75']=flatdattot[int(np.round(len(flatdattot)*0.75))]
-        hdr0['DATAP90']=flatdattot[int(np.round(len(flatdattot)*0.9))]
-        hdr0['DATAP95']=flatdattot[int(np.round(len(flatdattot)*0.95))]
-        hdr0['DATAP98']=flatdattot[int(np.round(len(flatdattot)*0.98))]
-        hdr0['DATAP99']=flatdattot[int(np.round(len(flatdattot)*0.99))]
-        del dattot, flatdattot #I imagine these are large, so delete them after they are no longer needed
+                hdr0['TWMIN'+str(indices[key])]=wvlns[key][lamwin[key][0]]
+                hdr0['TWMAX'+str(indices[key])]=wvlns[key][lamwin[key][1]]
+                hdr0['TDMEAN'+str(indices[key])]=np.mean(dat[key])
+                hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((dat[key]-np.mean(dat[key]))**2)/dat[key].size)
+                hdr0['TDMEDN'+str(indices[key])]=np.median(dat[key])
+                hdr0['TDMIN'+str(indices[key])]=np.min(dat[key])
+                hdr0['TDMAX'+str(indices[key])]=np.max(dat[key])
+                hdr0['TDSKEW'+str(indices[key])]=scist.skew(dat[key], axis=None)
+                hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(dat[key], axis=None)
+                
+                flatdat=np.sort(dat[key].flatten())
+                hdr0['TDP01_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.01))]
+                hdr0['TDP10_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.1))]
+                hdr0['TDP25_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.25))]
+                hdr0['TDP75_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.75))]
+                hdr0['TDP90_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.9))]
+                hdr0['TDP95_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.95))]
+                hdr0['TDP98_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.98))]
+                hdr0['TDP99_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.99))]
+                del flatdat
 
-        phdu=fits.PrimaryHDU(None, header=hdr0)
-        hduls=[phdu]
-        for key in indices:
-            hduls.append(fits.ImageHDU(dat[key], header=hdrdict[key]))
+        if key!='NUV' and key!='FUV': #Full disc
+            for ind, key in enumerate(dat):
+                if ind==0:
+                    dattot=dat[key] #Needed for header stuff. (DATa TOTal)
+                else:
+                    dattot=np.concatenate((dattot, dat[key]), axis=2)
+            hdr0['DATAMEAN']=np.mean(dattot)
+            hdr0['DATARMS']=np.sqrt(np.sum((dattot-np.mean(dattot))**2)/dattot.size)
+            hdr0['DATAMEDN']=np.median(dattot)
+            hdr0['DATAMIN']=np.min(dattot)
+            hdr0['DATAMAX']=np.max(dattot)
+            hdr0['DATASKEW']=scist.skew(dattot, axis=None)
+            hdr0['DATAKURT']=scist.kurtosis(dattot, axis=None)
+            flatdattot=np.sort(dattot.flatten())
+            hdr0['DATAP01']=flatdattot[int(np.round(len(flatdattot)*0.01))]
+            hdr0['DATAP10']=flatdattot[int(np.round(len(flatdattot)*0.1))]
+            hdr0['DATAP25']=flatdattot[int(np.round(len(flatdattot)*0.25))]
+            hdr0['DATAP75']=flatdattot[int(np.round(len(flatdattot)*0.75))]
+            hdr0['DATAP90']=flatdattot[int(np.round(len(flatdattot)*0.9))]
+            hdr0['DATAP95']=flatdattot[int(np.round(len(flatdattot)*0.95))]
+            hdr0['DATAP98']=flatdattot[int(np.round(len(flatdattot)*0.98))]
+            hdr0['DATAP99']=flatdattot[int(np.round(len(flatdattot)*0.99))]
+            del dattot, flatdattot #I imagine these are large, so delete them after they are no longer needed
+
+            phdu=fits.PrimaryHDU(None, header=hdr0)
+            hduls=[phdu]
+            for key in indices:
+                hduls.append(fits.ImageHDU(dat[key], header=hdrdict[key]))
+        
+        else:
+            phdu=fits.PrimaryHDU(dat[list(indices.keys())[0]], header=hdrdict[list(indices.keys())[0]])
+            hduls[phdu]
+            for hds in range(1, len(rasfits)):
+                hduls.append(dc(asfits[hds]))
+
         hdul=fits.HDUList(hduls)
         if save:
             hdul.writeto(rasfits.filename()[:-5]+'_rc.fits')
