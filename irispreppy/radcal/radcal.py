@@ -95,7 +95,10 @@ def radcal(ras, save=False, quiet=True, debug=False):
     elif hdulistin:
         rasfits=ras[0]
 
-    end=dt.datetime.strptime(rasfits[0].header['ENDOBS'], '%Y-%m-%dT%H:%M:%S.%f')
+    if 'ENDOBS' not in rasfits[0].header:
+        end=dt.datetime.strptime(rasfits[0].header['DATE_END'], '%Y-%m-%dT%H:%M:%S.%f')
+    else:
+        end=dt.datetime.strptime(rasfits[0].header['ENDOBS'], '%Y-%m-%dT%H:%M:%S.%f')
     midtime=dt.datetime.strftime((begin+((end-begin)/2)), '%Y-%m-%dT%H:%M:%S.%fZ')
 
     response=(igr.iris_get_response(midtime))[0]
