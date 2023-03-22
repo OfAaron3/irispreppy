@@ -332,9 +332,8 @@ def radcal(ras, save=False, quiet=True, debug=False):
         hdrdict={}
 
         for key in indices: 
-            dat[key]=dc(rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]])
-
             if key!='NUV' and key!='FUV': #Not full disc
+                dat[key]=dc(rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]])
                 for ind, _ in np.ndenumerate(dat[key][...,0]):
                     dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
                 hdrdict[key]=dc(rasfits[indices[key]].header)
@@ -362,6 +361,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 hdr0['TDP99_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.99))]
                 del flatdat
             else:
+                dat[key]=dc(rasfits[indices[key]].data[lamwin[key][0]:lamwin[key][1]])
                 for ind, _ in np.ndenumerate(dat[key][0]):
                     dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
                 hdrdict[key]=dc(rasfits[indices[key]].header)
