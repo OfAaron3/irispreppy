@@ -400,7 +400,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
         
         else:
             phdu=fits.PrimaryHDU(dat[list(indices.keys())[0]], header=hdrdict[list(indices.keys())[0]])
-            hduls[phdu]
+            hduls=[phdu]
             for hds in range(1, len(rasfits)):
                 hduls.append(dc(asfits[hds]))
 
