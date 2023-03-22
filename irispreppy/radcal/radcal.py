@@ -362,8 +362,8 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 del flatdat
             else:
                 dat[key]=dc(rasfits[indices[key]].data[lamwin[key][0]:lamwin[key][1]])
-                for ind, _ in np.ndenumerate(dat[key][...,0]):
-                    dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
+                for ind, _ in np.ndenumerate(dat[key][0]):
+                    dat[key][ind]=np.multiply(dat[key][:,ind[0], ind[1]], rcfs[key])
                 hdrdict[key]=dc(rasfits[indices[key]].header)
                 hdrdict[key]['CRVAL3']=wvlns[key][lamwin[key][0]]
                 hdrdict[key]['NAXIS3']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
