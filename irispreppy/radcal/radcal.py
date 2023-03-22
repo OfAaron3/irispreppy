@@ -332,7 +332,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
         hdrdict={}
 
         for key in indices: 
-            if key!='NUV' and key!='FUV': #Not full disc
+            if key!='NUV' and key!='FUV': #Full disc
                 dat[key]=dc(rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]])
                 for ind, _ in np.ndenumerate(dat[key][...,0]):
                     dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
@@ -402,7 +402,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
             phdu=fits.PrimaryHDU(dat[list(indices.keys())[0]], header=hdrdict[list(indices.keys())[0]])
             hduls=[phdu]
             for hds in range(1, len(rasfits)):
-                hduls.append(dc(asfits[hds]))
+                hduls.append(dc(rasfits[hds]))
 
         hdul=fits.HDUList(hduls)
         if save:
