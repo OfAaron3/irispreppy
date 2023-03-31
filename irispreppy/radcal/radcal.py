@@ -132,9 +132,9 @@ def radcal(ras, save=False, quiet=True, debug=False):
     if indices=={}:
         #Full disc mosaic
         if rasfits[0].header['CRVAL3']>2000:
-            indices={'NUV':0}
+            indices={'fdNUV':0}
         else:
-            indices={'FUV':0}    
+            indices={'fdFUV':0}    
 
     ###################
     # Wavelength axes #
@@ -204,7 +204,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
     #Spectral Pixel Width [angstroms]#
     ##################################
 
-    if 'NUV' in indices or 'FUV' in indices:
+    if 'fdNUV' in indices or 'fdFUV' in indices:
         pixl={key: rasfits[indices[key]].header['CDELT3'] for key in indices}
     else:
         pixl={key: rasfits[indices[key]].header['CDELT1'] for key in indices}
@@ -222,11 +222,11 @@ def radcal(ras, save=False, quiet=True, debug=False):
 
     const={}
     for key in indices:
-        if key=='FUV':
+        if key=='fdFUV':
             const[key]=d2pFUV/(pixxy[key]*pixl[key]*tfuv*wslit)
-        elif key=='NUV':
+        elif key=='fdNUV':
                 const[key]=d2pNUV/(pixxy[key]*pixl[key]*tnuv*wslit)
-        elif rasfits[0].header['TDET'+str(indices[key])]=='FUV':
+        elif 'FUV' in rasfits[0].header['TDET'+str(indices[key])]:
             const[key]=d2pFUV/(pixxy[key]*pixl[key]*tfuv*wslit)
         else:
             const[key]=d2pNUV/(pixxy[key]*pixl[key]*tnuv*wslit)
@@ -249,7 +249,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
     wvlns={}
     rcfs={} #Radiometric Calibration FactorS
     for key in indices:
-        if key=='FUV':
+        if key=='fdFUV':
             wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS3']), rasfits[indices[key]].header['CRPIX3']-1), rasfits[indices[key]].header['CDELT3']), rasfits[indices[key]].header['CRVAL3'])
             lamwin[key]=[-1, -1]
             for ind, wvln in enumerate(wvlns[key]):
@@ -259,7 +259,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                     lamwin[key][1]=ind-1
                     break
             rcfs[key]=f_FUV1(wvlns[key][lamwin[key][0]:lamwin[key][1]])*const[key]
-        elif key=='NUV':
+        elif key=='fdNUV':
             wvlns[key]=np.add(np.multiply(np.subtract(np.arange(0, rasfits[indices[key]].header['NAXIS3']), rasfits[indices[key]].header['CRPIX3']-1), rasfits[indices[key]].header['CDELT3']), rasfits[indices[key]].header['CRVAL3'])
             lamwin[key]=[-1, -1]
             for ind, wvln in enumerate(wvlns[key]):
@@ -332,7 +332,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
         hdrdict={}
 
         for key in indices: 
-            if key!='NUV' and key!='FUV': #Full disc
+            if key!='fdNUV' and key!='fdFUV': #Not full disc
                 dat[key]=dc(rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]])
                 for ind, _ in np.ndenumerate(dat[key][...,0]):
                     dat[key][ind]=np.multiply(dat[key][ind], rcfs[key])
@@ -369,7 +369,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 hdrdict[key]['NAXIS3']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
 
-        if key!='NUV' and key!='FUV': #Full disc
+        if key!='fdNUV' and key!='fdFUV': #Not full disc
             for ind, key in enumerate(dat):
                 if ind==0:
                     dattot=dat[key] #Needed for header stuff. (DATa TOTal)
