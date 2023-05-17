@@ -129,7 +129,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
                 if rasfits[0].header['TDET'+str(i)] not in cdelt:
                     cdelt[rasfits[0].header['TDET'+str(i)]]=rasfits[i].header['CDELT2']
                 else:
-                    assert cdelt[rasfits[0].header['TDET'+str(i)]]==rasfit[i].header['CDELT2']
+                    assert cdelt[rasfits[0].header['TDET'+str(i)]]==rasfits[i].header['CDELT2']
 
     elif '*' in ras:
         ras=ls(rass)
