@@ -188,14 +188,15 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
     
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-    for psfn in cdelt:
-        psf=psfs[psfn]
-        psfx=np.arange(0, len(psf))/6
-        datx=np.arange(0, psfx[-1], cdelt[psfn])
-        newpsf=np.interp(datx, psfx, psf)
-        psfi=np.trapz(newpsf, datx)
-        newpsf=newpsf/psfi
-        psfs[psfn]=newpsf
+    if cdelt:
+        for psfn in cdelt:
+            psf=psfs[psfn]
+            psfx=np.arange(0, len(psf))/6
+            datx=np.arange(0, psfx[-1], cdelt[psfn])
+            newpsf=np.interp(datx, psfx, psf)
+            psfi=np.trapz(newpsf, datx)
+            newpsf=newpsf/psfi
+            psfs[psfn]=newpsf
 
     if pathlistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
