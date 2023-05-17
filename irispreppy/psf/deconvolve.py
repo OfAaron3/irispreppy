@@ -123,6 +123,13 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
     if type(ras)==fits.hdu.hdulist.HDUList:
         assert ras[0].header['TELESCOP']=='IRIS'
         rasfits=dc(ras)
+        if cdelt==None:
+            cdelt={}
+            for i in range(1, ex[0].header['NWIN']+1):
+                if ex[0].header['TDET'+str(i)] not in cdelt:
+                    cdelt[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT2']
+                else:
+                    assert cdelt[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT2']
 
     elif '*' in ras:
         ras=ls(rass)
@@ -130,7 +137,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
         ex=fits.open(ras[0]) #example
         assert ex.header['TELESCOP']=='IRIS'
         pathlistin=True
-        if not cdelt:
+        if cdelt==None:
             cdelt={}
             for i in range(1, ex[0].header['NWIN']+1):
                 if ex[0].header['TDET'+str(i)] not in cdelt:
@@ -141,7 +148,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
     elif type(ras)==str:
         try:
             rasfits=fits.open(ras)
-            if not cdelt:
+            if cdelt==None:
                 cdelt={}
                 for i in range(1, rasfits[0].header['NWIN']+1):
                     if rasfits[0].header['TDET'+str(i)] not in cdelt:
@@ -157,7 +164,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
         if type(ras[0])==fits.hdu.hdulist.HDUList:
             assert ras[0][0].header['TELESCOP']=='IRIS'
             hdulistin=True
-            if not cdelt:
+            if cdelt==None:
                 cdelt={}
                 for i in range(1, ras[0][0].header['NWIN']+1):
                     if ras[0][0].header['TDET'+str(i)] not in cdelt:
@@ -170,7 +177,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=None):
                 ex=fits.open(ras[0])
                 assert ex[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
-                if not cdelt:
+                if cdelt==None:
                     cdelt={}
                     for i in range(1, ex[0].header['NWIN']+1):
                         if ex[0].header['TDET'+str(i)] not in cdelt:
