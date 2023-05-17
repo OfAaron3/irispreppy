@@ -49,7 +49,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
                 print("New response file found, "+href+'.\nDownloading...')
                 urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
                 newgeny=readsav('temp.geny')
-                remove(geny)
+                remove('temp.geny')
                 recgeny=newgeny[list(newgeny.keys())[0]][0]
                 with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                     pickle.dump(recgeny, pklout)
@@ -295,7 +295,7 @@ if __name__=="__main__":
             print("New response file found, "+href+'.\nDownloading...')
             urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
             newgeny=readsav('temp.geny')
-            remove(geny)
+            remove('temp.geny')
             recgeny=newgeny[list(newgeny.keys())[0]][0]
             with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                 pickle.dump(recgeny, pklout)
