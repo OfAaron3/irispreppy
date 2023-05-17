@@ -289,7 +289,7 @@ if __name__=="__main__":
         htmlsoup=BeautifulSoup(respurl, 'html.parser')
     for tags in htmlsoup.find_all('a'):
         href=tags.get('href')
-        print(href)
+        #print(href)
         if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
             new=True
             print("New response file found, "+href+'.\nDownloading...')
