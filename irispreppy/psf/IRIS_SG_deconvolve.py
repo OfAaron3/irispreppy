@@ -55,7 +55,7 @@ def IRIS_SG_deconvolve(data_in, psf,
     return dcvim
 
 
-def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1):
+def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=dy):
     
 
     '''   
@@ -105,6 +105,8 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1):
         rs = ydiff/2
         pin=np.pad(psfin, [int(np.floor(rs)), int(np.ceil(rs))], 'edge')
         #Use edge values or you get a divide by zero error
+        #renormalise
+        pin=pin/np.trapz(pin, dx=dy)
                
     #Replicate the PSF over wavelength array also
     pin_full = np.transpose(np.tile(pin,[imsize[1],1]))
