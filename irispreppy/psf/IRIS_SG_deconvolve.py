@@ -55,7 +55,7 @@ def IRIS_SG_deconvolve(data_in, psf,
     return dcvim
 
 
-def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=dy):
+def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1/6):
     
 
     '''   
