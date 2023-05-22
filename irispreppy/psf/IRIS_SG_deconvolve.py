@@ -103,13 +103,14 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1):
     #Pad the PSF if it is too short
     if ydiff > 0:
         rs = ydiff/2
-        pin=np.pad(psfin, [int(np.floor(rs)), int(np.ceil(rs))])
+        pin=np.pad(psfin, [int(np.floor(rs)), int(np.ceil(rs))], 'edge')
+        #Use edge values or you get a divide by zero error
                
     #Replicate the PSF over wavelength array also
     pin_full = np.transpose(np.tile(pin,[imsize[1],1]))
     
     #Shift PSF center to zero to center output
-    pin_full = np.roll(pin_full, (int(-imsize[0]/2),0),axis=0)
+    pin_full = np.roll(pin_full, (-imsize[0]//2,0),axis=0)
         
     #Reverse the PSF if needed
     if rev_psf == True:
