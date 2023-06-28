@@ -4,6 +4,7 @@ import urllib.request
 from datetime import datetime as dt
 from glob import glob as ls
 from os import path, remove
+import http.client
 
 import numpy as np
 from astropy.time import Time
@@ -58,6 +59,8 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
                 resps.sort()
     except urllib.error.URLError:
         print("You are not connected to the internet. Cannot check for new response files.")
+    except:
+        print("Hesperia is reachable but not loading. Cannot check for new response files.")
 
     #0a Opening correct file
     if pre_launch:
@@ -285,20 +288,28 @@ if __name__=="__main__":
     resps=ls(path.join(resppath, "*.pkl"))
     resps.sort()
     new=False
-    with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
-        htmlsoup=BeautifulSoup(respurl, 'html.parser')
-    for tags in htmlsoup.find_all('a'):
-        href=tags.get('href')
-        #print(href)
-        if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
-            new=True
-            print("New response file found, "+href+'.\nDownloading...')
-            urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
-            newgeny=readsav('temp.geny')
-            remove('temp.geny')
-            recgeny=newgeny[list(newgeny.keys())[0]][0]
-            with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
-                pickle.dump(recgeny, pklout)
+    try:
+        with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
+            htmlsoup=BeautifulSoup(respurl, 'html.parser')
+        for tags in htmlsoup.find_all('a'):
+            href=tags.get('href')
+            if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
+                print("New response file found, "+href+'.\nDownloading...')
+                urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
+                newgeny=readsav('temp.geny')
+                remove('temp.geny')
+                recgeny=newgeny[list(newgeny.keys())[0]][0]
+                with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
+                    pickle.dump(recgeny, pklout)
+
+                resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
+                resps.sort()
+    except urllib.error.URLError:
+        print("You are not connected to the internet. Cannot check for new response files.")
+        new=True
+    except:
+        print("Hesperia is reachable but not loading. Cannot check for new response files.")
+        new=True
     if not new:
         print("No new response files found.")
 

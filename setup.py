@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 setup(name='irispreppy',
-      version="1.1.22",
+      version="1.1.24",
       url='https://github.com/OfAaron3/irispreppy',
       author='Aaron W. Peat',
       author_email='aaron.peat@uwr.edu.pl',
@@ -17,7 +17,8 @@ setup(name='irispreppy',
           'tqdm',
           'astropy',
           'scipy',
-          'beautifulsoup4'
+          'beautifulsoup4',
+          'weno4'
       ],
       include_package_data=True,
       zip_safe=False,
