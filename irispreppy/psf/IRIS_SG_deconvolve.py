@@ -96,7 +96,7 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1/6):
     #Cut the PSF if it is too long
     if ydiff < 0:
         rs = (-1*ydiff)/2
-        pin=psfin[int(np.floor(rs)):int(np.ceil(rs))]
+        pin=psfin[int(np.floor(rs)):-int(np.ceil(rs))]
         #renormalize PSF (dx=1)
         pin = pin/np.trapz(pin, dx=dy) 
         
