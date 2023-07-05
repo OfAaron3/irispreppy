@@ -95,6 +95,8 @@ def radcal(ras, save=False, quiet=True, debug=False):
     elif hdulistin:
         rasfits=ras[0]
 
+    rasfits.verify('fix')
+
     if 'STARTOBS' not in rasfits[0].header:
         begin=dt.datetime.strptime(rasfits[0].header['DATE_OBS'], '%Y-%m-%dT%H:%M:%S.%f')
     else:
@@ -405,6 +407,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 hduls.append(dc(rasfits[hds]))
 
         hdul=fits.HDUList(hduls)
+        hudl.verify('fix')
         if save:
             hdul.writeto(rasfits.filename()[:-5]+'_rc.fits')
         else:
