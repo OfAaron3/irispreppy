@@ -407,7 +407,7 @@ def radcal(ras, save=False, quiet=True, debug=False):
                 hduls.append(dc(rasfits[hds]))
 
         hdul=fits.HDUList(hduls)
-        hudl.verify('fix')
+        hdul.verify('fix')
         if save:
             hdul.writeto(rasfits.filename()[:-5]+'_rc.fits')
         else:
