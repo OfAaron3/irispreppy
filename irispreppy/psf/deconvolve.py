@@ -196,10 +196,10 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
     if cdelt:
-        for psfn in cdelt:
+        for psfn in cdelts:
             psf=psfs[psfn]
             psfx=np.arange(0, len(psf))/6
-            datx=np.arange(0, psfx[-1], cdelt[psfn])
+            datx=np.arange(0, psfx[-1], cdelts[psfn])
             newpsf=np.interp(datx, psfx, psf)
             psfi=np.trapz(newpsf, datx)
             newpsf=newpsf/psfi
