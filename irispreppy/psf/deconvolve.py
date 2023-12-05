@@ -204,6 +204,8 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
             psfi=np.trapz(newpsf, datx)
             newpsf=newpsf/psfi
             psfs[psfn]=newpsf
+    else:
+        cdelts=None
 
     if pathlistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
