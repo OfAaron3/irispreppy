@@ -207,13 +207,13 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
 
     if pathlistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save, cdelts=cdelt) for i in range(0, len(ras))]
+            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save, cdelts=cdelts) for i in range(0, len(ras))]
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
                 pass 
         out=[f for f in futures]
     elif hdulistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save, cdelts=cdelt) for i in range(0, len(ras))]
+            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save, cdelts=cdelts) for i in range(0, len(ras))]
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
                 pass
         out=[f for f in futures]
