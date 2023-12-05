@@ -36,7 +36,7 @@ def ParDecon(rasfits, psfs, save=False):
         psfind=rasfits[0].header['TDET'+str(indices[key])]
         hdrdict[key]=dc(rasfits[indices[key]].header)
         for j in range(0, nlines):
-            decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True, dy=dy)
+            decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
 
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(decondict[key])
