@@ -5,7 +5,7 @@ import scipy.fft as fft
 def IRIS_SG_deconvolve(data_in, psf, 
                        iterations=10, 
                        fft_div=False,
-                       dy=1):
+                       ):
 
 
     '''
@@ -47,15 +47,15 @@ def IRIS_SG_deconvolve(data_in, psf,
     else:
         for ind in range(1,iterations+1):
             #print('iteration = %3d' %(ind))
-            step1 = data_in_zr/(FFT_conv_1D(dcvim,psf,rev_psf=False,div=False, dy=dy))
+            step1 = data_in_zr/(FFT_conv_1D(dcvim,psf,rev_psf=False,div=False))
             #print(np.nanmax(step1[265,:]))
-            step2 = FFT_conv_1D(step1,psf, rev_psf=True, dy=dy)
+            step2 = FFT_conv_1D(step1,psf, rev_psf=True)
             dcvim = dcvim * step2
 
     return dcvim
 
 
-def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1/6):
+def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
     
 
     '''   
@@ -95,18 +95,20 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False, dy=1/6):
     
     #Cut the PSF if it is too long
     if ydiff < 0:
-        rs = (-1*ydiff)/2
-        pin=psfin[int(np.floor(rs)):-int(np.ceil(rs))]
+        rs = int((-1*ydiff)/2)
+        if ydiff % 2 ==1:
+            pin=psfin[rs+1:-rs]
+        else:
+            pin=psfin[rs:-rs]
         #renormalize PSF (dx=1)
-        pin = pin/np.trapz(pin, dx=dy) 
+        pin = pin/np.sum(pin) 
         
     #Pad the PSF if it is too short
     if ydiff > 0:
         rs = ydiff/2
         pin=np.pad(psfin, [int(np.floor(rs)), int(np.ceil(rs))], 'edge')
         #Use edge values or you get a divide by zero error
-        #renormalise
-        pin=pin/np.trapz(pin, dx=dy)
+       
                
     #Replicate the PSF over wavelength array also
     pin_full = np.transpose(np.tile(pin,[imsize[1],1]))

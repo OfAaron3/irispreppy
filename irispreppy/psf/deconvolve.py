@@ -15,7 +15,7 @@ from . import IRIS_SG_deconvolve as isd
 #There are two functions here
 
 
-def ParDecon(rasfits, psfs, save=False, cdelts=None):
+def ParDecon(rasfits, psfs, save=False):
     '''Function acts as a wrapper around IRIS_SG_deconvolve
     Input Paramteres: 
         rasfits: The hdu to be deconvolved
@@ -35,10 +35,6 @@ def ParDecon(rasfits, psfs, save=False, cdelts=None):
         decondict[key]=np.zeros_like(rasfits[indices[key]].data)
         psfind=rasfits[0].header['TDET'+str(indices[key])]
         hdrdict[key]=dc(rasfits[indices[key]].header)
-        if not cdelts:
-            dy=1
-        else:
-            dy=cdelts[psfind]
         for j in range(0, nlines):
             decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True, dy=dy)
 
@@ -98,7 +94,7 @@ def ParDecon(rasfits, psfs, save=False, cdelts=None):
         return(hdul)
 
 
-def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
+def deconvolve(ras, quiet=False, save=False, limitcores=False):
     '''Function prepares input to ParDecon
     Input Paramteres: 
         ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
@@ -123,13 +119,6 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
     if type(ras)==fits.hdu.hdulist.HDUList:
         assert ras[0].header['TELESCOP']=='IRIS'
         rasfits=dc(ras)
-        if cdelt:
-            cdelts={}
-            for i in range(1, rasfits[0].header['NWIN']+1):
-                if rasfits[0].header['TDET'+str(i)] not in cdelts:
-                    cdelts[rasfits[0].header['TDET'+str(i)]]=rasfits[i].header['CDELT2']
-                else:
-                    assert cdelts[rasfits[0].header['TDET'+str(i)]]==rasfits[i].header['CDELT2']
 
     elif '*' in ras:
         ras=ls(rass)
@@ -137,26 +126,10 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
         ex=fits.open(ras[0]) #example
         assert ex.header['TELESCOP']=='IRIS'
         pathlistin=True
-        if cdelt:
-            cdelts={}
-            for i in range(1, ex[0].header['NWIN']+1):
-                if ex[0].header['TDET'+str(i)] not in cdelts:
-                    cdelts[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT2']
-                else:
-                    assert cdelts[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT2']
 
     elif type(ras)==str:
         try:
             rasfits=fits.open(ras)
-            if cdelt:
-                cdelts={}
-                for i in range(1, rasfits[0].header['NWIN']+1):
-                    if rasfits[0].header['TDET'+str(i)] not in cdelts:
-                        cdelts[rasfits[0].header['TDET'+str(i)]]=rasfits[i].header['CDELT2']
-                    else:
-                        assert cdelts[rasfits[0].header['TDET'+str(i)]]==rasfits[i].header['CDELT2']
-
-                    assert rasfits[0].header['TELESCOP']=='IRIS'
         except NameError:
             raise ValueError("Must supply fits file or path to fits file or * directory for one set of observations")
 
@@ -164,26 +137,12 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
         if type(ras[0])==fits.hdu.hdulist.HDUList:
             assert ras[0][0].header['TELESCOP']=='IRIS'
             hdulistin=True
-            if cdelt:
-                cdelts={}
-                for i in range(1, ras[0][0].header['NWIN']+1):
-                    if ras[0][0].header['TDET'+str(i)] not in cdelts:
-                        cdeltss[ras[0][0].header['TDET'+str(i)]]=ras[0][i].header['CDELT2']
-                    else:
-                        assert cdelts[ras[0][0].header['TDET'+str(i)]]==ras[0][i].header['CDELT2']
 
         else:
             try:
                 ex=fits.open(ras[0])
                 assert ex[0].header['TELESCOP']=='IRIS'
                 pathlistin=True
-                if cdelt:
-                    cdelts={}
-                    for i in range(1, ex[0].header['NWIN']+1):
-                        if ex[0].header['TDET'+str(i)] not in cdelts:
-                            cdelts[ex[0].header['TDET'+str(i)]]=ex[i].header['CDELT2']
-                        else:
-                            assert cdelts[ex[0].header['TDET'+str(i)]]==ex[i].header['CDELT2']
             except NameError:
                 raise ValueError("Must supply fits file or * directory for one set of observations")
     else:
@@ -195,27 +154,17 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False, cdelt=True):
     
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-    if cdelt:
-        for psfn in cdelts:
-            psf=psfs[psfn]
-            psfx=np.arange(0, len(psf))/6
-            datx=np.arange(0, psfx[-1], cdelts[psfn])
-            newpsf=np.interp(datx, psfx, psf)
-            psfi=np.trapz(newpsf, datx)
-            newpsf=newpsf/psfi
-            psfs[psfn]=newpsf
-    else:
-        cdelts=None
+
 
     if pathlistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save, cdelts=cdelts) for i in range(0, len(ras))]
+            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save) for i in range(0, len(ras))]
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
                 pass 
         out=[f for f in futures]
     elif hdulistin:
         with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save, cdelts=cdelts) for i in range(0, len(ras))]
+            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save) for i in range(0, len(ras))]
             for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
                 pass
         out=[f for f in futures]
