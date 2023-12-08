@@ -261,11 +261,14 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
             a[ww, 2*j]=1
             a[ww, 2*j+1]=np.exp(ee[j]*(tt-tcc[j,0]))
         # ; base vector for interval when multiplier is linear function of time
+        # Sometimes dtt<0, so have to NaN it before the power to stop a warning
         if j>0:
             ww=np.where((tt>tcc[j-1,1]) & (tt < tcc[j,0]))
             nww=len(ww)
             if nww>0:
                 dtt=(tt-tcc[j-1,1])/(tcc[j,0]-tcc[j-1, 1])
+                if dtt<0:
+                    dtt=np.nan
                 a[ww, 2*j]=dtt**tex
                 a[ww, 2*j+1]=dtt**tex*np.exp(ee[j]*(tt-tcc[j,0]))
         if j < (m-1):
@@ -273,6 +276,8 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
             nww=len(ww)
             if nww>0:
                 dtt=(tt-tcc[j,1])/(tcc[j+1,0]-tcc[j,1])
+                if dtt<0:
+                    dtt=np.nan
                 a[ww, 2*j]=1-dtt**tex
                 a[ww, 2*j+1]=(1-dtt**tex)*np.exp(ee[j]*(tt-tcc[j,0]))
 

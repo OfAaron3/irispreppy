@@ -17,23 +17,18 @@ def IRIS_SG_deconvolve(data_in, psf,
 
     PURPOSE: Deconvolves IRIS SG data using the PSFs from Courrier et al 2018.
     
-    INPUTS: data_in -- A 2D IRIS SG array [ypos, wavelength]
-            psf     -- The appropriate PSF 
-                       These are not currently in iris_lmsalpy, so I have just 
-                       saved the IDL versions and restore them in the notebook 
-                       before I call this function. 
-            iterations -- The number of Richardson Lucy iterations to run through
-                          Default = 10
-            fft_div -- Set to use skip iterations and instead deconvolve by division
-                       in Fourier Space   
+    Input Parameters: 
+        data_in    -- A 2D IRIS SG array [ypos, wavelength]
+        psf        -- The appropriate PSF
+        iterations -- The number of Richardson Lucy iterations to run through (Default = 10)
+        fft_div    -- Set to use skip iterations and instead deconvolve by division Fourier Space   
 
     NOTES: Based on iris_sg_deconvolve.pro by Hans Courrier, but not all the functionality
            is included here yet
 
-           There are probably more clever ways to code this in -- i'm fairly new to python. 
-
-            To Do: Add error statements
-
+    
+    History
+    GSK 2020: Code translated
     '''
 
 
@@ -42,46 +37,35 @@ def IRIS_SG_deconvolve(data_in, psf,
     dcvim[dcvim<0] = 0
     data_in_zr = dcvim
 
-    if fft_div == True:
+    if fft_div:
         dcvim = FFT_conv_1D(data_in,psf,div=True)
     else:
         for ind in range(1,iterations+1):
-            #print('iteration = %3d' %(ind))
-            step1 = data_in_zr/(FFT_conv_1D(dcvim,psf,rev_psf=False,div=False))
-            #print(np.nanmax(step1[265,:]))
+            step1 = data_in_zr/(FFT_conv_1D(dcvim,psf, rev_psf=False, div=False))
             step2 = FFT_conv_1D(step1,psf, rev_psf=True)
             dcvim = dcvim * step2
 
-    return dcvim
+    return(dcvim)
 
 
 def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
     
-
     '''   
     Notes AWP: This is not a good docstring, will fix later.
 
-    NAME: FFT_conv_1D
-    
-    PURPOSE: Function to do FFT convolution in the y-direction 
-              of the input data (first dimensioin). This way we 
-              can pass the 1D PSF.
-          
-    INPUTS: datain -- a 2D data array [nominally, slit pos vs wavelength]
-            psfin  -- the PSF to be applied in the y-direction
-            imsize -- the dimensions of the input data array 
-            psflen -- the length of the psf. 
-
-    KEYWORDS: div -- Set to True to divide in Fourier space. 
-                     Default is False, so multiply in Fourier space.
-              rev_psf -- Set to reverse the 1D input PSF
+    Input parameters  
+        datain -- a 2D data array [nominally, slit pos vs wavelength]
+        psfin  -- the PSF to be applied in the y-direction
+        div -- Set to True to divide in Fourier space (Default is False, so multiply in Fourier space)
+        rev_psf -- Set to reverse the 1D input PSF
               
-            
-    OUTPUTS: dataout -- the input data convolved with the PSF
+    Output:            
+        dataout -- the input data convolved with the PSF
     
-    NOTES: Pretty much copied exactly from Hans Courrier's IDL version 
-            in the SSW IRIS software tree, as part of iris_sg_deconvole.pro
-
+    Hisotory:
+    GSK 2020: Pretty much copied exactly from Hans Courrier's IDL version in the SSW IRIS software tree, as part of iris_sg_deconvole.pro
+    AWP 2021: Code fixed
+    AWP 2023: Streamlined some of the code
     '''
   
     #length of input psf
@@ -95,33 +79,29 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
     
     #Cut the PSF if it is too long
     if ydiff < 0:
-        rs = int((-1*ydiff)/2)
-        if ydiff % 2 ==1:
-            pin=psfin[rs+1:-rs]
-        else:
-            pin=psfin[rs:-rs]
+        pin=psfin[-(ydiff//2):ydiff//2+ydiff%2]
         #renormalize PSF (dx=1)
         pin = pin/np.sum(pin) 
         
     #Pad the PSF if it is too short
     if ydiff > 0:
-        rs = ydiff/2
-        pin=np.pad(psfin, [int(np.floor(rs)), int(np.ceil(rs))], 'edge')
+        rs = ydiff//2
+        pin=np.pad(psfin, [rs, rs+ydiff%2], 'edge')
         #Use edge values or you get a divide by zero error
-       
-               
-    #Replicate the PSF over wavelength array also
-    pin_full = np.transpose(np.tile(pin,[imsize[1],1]))
+        #renormalize PSF (dx=1)
+        pin = pin/np.sum(pin) 
     
-    #Shift PSF center to zero to center output
-    pin_full = np.roll(pin_full, (-imsize[0]//2,0),axis=0)
-        
+    #Replicate the PSF over wavelength array also
+    pin_full = (np.repeat(pin, imsize[1])).reshape(len(pin), imsize[1])
+
+    #Shift PSF center to zero to center output (slicing instead of rolling)
+    pin_full = np.concatenate([pin_full[imsize[0]//2:], pin_full[:imsize[0]//2]])
+
     #Reverse the PSF if needed
-    if rev_psf == True:
+    if rev_psf:
         pin_full = np.flip(pin_full,axis=0)        
-        if psflen % 2 == 0:
+        if psflen%2 == 0:
             pin_full = np.roll(pin_full,(1,0),axis=0)
-            
     
     #Perform the FFT
     fpsf = fft.fft(pin_full,axis=0)
@@ -129,9 +109,9 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
     fdatain = fft.fft(datain,axis=0)
     
     #Multiply(divide) the PSF and data, and convert back to k space
-    if div == False: 
+    if not div: 
         dataout = fft.ifft((fdatain*fpsf),axis=0).real
     else:
         dataout = fft.ifft((fdatain/fpsf),axis=0).real
     
-    return dataout
+    return(dataout)

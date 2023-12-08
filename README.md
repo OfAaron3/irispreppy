@@ -12,9 +12,9 @@ This remains untested on Mac. However, I expect it to work on UNIX-like OSes.
 
 ---
 
-Usage
+tl;dr usage
 
-irispreppy can take a list of HDU objects, a list of a directory paths to fits, or single HDU objects. For example,
+irispreppy takes a single HDU objects. To calibrate and deconvolve,
 
 ```python
 from astropy.io import fits
@@ -24,6 +24,19 @@ raw=fits.open("path/to/file.fits") #Raw data
 rc=ip.radcal(raw)		   #Radiometrically calibrated
 rc_d=ip.deconvolve(rc)		   #Radiometrically calibrated and deconvolved
 ```
+
+irispreppy takes a single HDU objects. To calibrate and deconvolve, and save,
+
+```python
+from astropy.io import fits
+import irispreppy as ip
+
+raw=fits.open("path/to/file.fits") #Raw data
+ip.radcal(raw, save=True)		   #Radiometrically calibrated
+rc=fits.open("path/to/file_rc.fits")
+ip.deconvolve(rc, save=True)		   #Radiometrically calibrated and deconvolved
+```
+
 
 ---
 More in depth documentation will be added in the future.

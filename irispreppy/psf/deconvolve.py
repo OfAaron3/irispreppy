@@ -27,27 +27,24 @@ def ParDecon(rasfits, psfs, save=False):
         If save=True: 0
     '''
     hdr0=dc(rasfits[0].header)
-    nlines=rasfits[0].header['NEXP']
-    indices={rasfits[0].header[name]: ind+1 for ind, name in enumerate(rasfits[0].header['TDESC*'])}
-    decondict={}
-    hdrdict={}
-    for key in indices:
-        decondict[key]=np.zeros_like(rasfits[indices[key]].data)
-        psfind=rasfits[0].header['TDET'+str(indices[key])]
-        hdrdict[key]=dc(rasfits[indices[key]].header)
+    nlines=hdr0['NEXP']
+    indices={hrd0[name]: ind+1 for ind, name in enumerate(hdr0['TDESC*'])}
+    deconlst=[]
+    for index, key in enumerate(indices):
+        deconlst.append(np.zeros_like(rasfits[indices[key]].data))
+        psfind=hdr0['TDET'+str(indices[key])]
         for j in range(0, nlines):
-            decondict[key][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
+            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=False)
 
+        hdr0['TDMEAN'+str(indices[key])]=np.mean(deconlst[index])
+        hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((deconlst[index]-np.mean(deconlst[index]))**2)/deconlst[index].size)
+        hdr0['TDMEDN'+str(indices[key])]=np.median(deconlst[index])
+        hdr0['TDMIN'+str(indices[key])]=np.min(deconlst[index])
+        hdr0['TDMAX'+str(indices[key])]=np.max(deconlst[index])
+        hdr0['TDSKEW'+str(indices[key])]=scist.skew(deconlst[index], axis=None)
+        hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(deconlst[index], axis=None)
 
-        hdr0['TDMEAN'+str(indices[key])]=np.mean(decondict[key])
-        hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((decondict[key]-np.mean(decondict[key]))**2)/decondict[key].size)
-        hdr0['TDMEDN'+str(indices[key])]=np.median(decondict[key])
-        hdr0['TDMIN'+str(indices[key])]=np.min(decondict[key])
-        hdr0['TDMAX'+str(indices[key])]=np.max(decondict[key])
-        hdr0['TDSKEW'+str(indices[key])]=scist.skew(decondict[key], axis=None)
-        hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(decondict[key], axis=None)
-
-        flatdat=np.sort(decondict[key].flatten())
+        flatdat=np.sort(deconlst[index].flatten())
         hdr0['TDP01_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.01))]
         hdr0['TDP10_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.1))]
         hdr0['TDP25_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.25))]
@@ -60,9 +57,9 @@ def ParDecon(rasfits, psfs, save=False):
 
     for ind, key in enumerate(decondict):
         if ind==0:
-            dattot=decondict[key] #Needed for header stuff. (DATa TOTal)
+            dattot=deconlst[ind] #Needed for header stuff. (DATa TOTal)
         else:
-            dattot=np.concatenate((dattot, decondict[key]), axis=2)
+            dattot=np.concatenate((dattot, deconlst[ind]), axis=2)
     hdr0['DATAMEAN']=np.mean(dattot)
     hdr0['DATARMS']=np.sqrt(np.sum((dattot-np.mean(dattot))**2)/dattot.size)
     hdr0['DATAMEDN']=np.median(dattot)
@@ -83,27 +80,21 @@ def ParDecon(rasfits, psfs, save=False):
 
     phdu=fits.PrimaryHDU(None, header=hdr0)
     hduls=[phdu]
-    for key in indices:
-        hduls.append(fits.ImageHDU(decondict[key], header=hdrdict[key]))
+    for index, key in enumerate(indices):
+        hduls.append(fits.ImageHDU(deconlst[index], header=rasfits[indices[key]].header))
     hdul=fits.HDUList(hduls)  
 
     if save:
-        hdul.writeto(rasfits.filename()[:-5]+'d.fits')
+        hdul.writeto(path.splitext(rasfits.filename())[0]+'d.fits')
         return(0)
     else:
         return(hdul)
 
 
-def deconvolve(ras, quiet=False, save=False, limitcores=False):
+def deconvolve(ras, save=False, limitcores=False):
     '''Function prepares input to ParDecon
     Input Paramteres: 
-        ras: String, list, or astropy.io.fits.hdu.hdulist.HDUList (hdu)
-             String: Path to IRIS spectrograph file
-                     Path to IRIS files using wildcard (ie, /path/to/files/*fits) of same observation
-             List: List of paths to spectrograph file of same observation
-                   List of hdus from same observation
-             hdu : An IRIS observation
-        quiet: If True, suppress all print statements
+        ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
         save: If True: Save the files with d appended
               If False: Return the deconvolved hdus
         limitcores: If True: use all but one core. If False use all cores. 
@@ -112,41 +103,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
         If save=True: 0
     '''
 
-
     nworkers=cpus()-int(limitcores)
-    pathlistin=False
-    hdulistin=False
-    if type(ras)==fits.hdu.hdulist.HDUList:
-        assert ras[0].header['TELESCOP']=='IRIS'
-        rasfits=dc(ras)
-
-    elif '*' in ras:
-        ras=ls(rass)
-        ras.sort()
-        ex=fits.open(ras[0]) #example
-        assert ex.header['TELESCOP']=='IRIS'
-        pathlistin=True
-
-    elif type(ras)==str:
-        try:
-            rasfits=fits.open(ras)
-        except NameError:
-            raise ValueError("Must supply fits file or path to fits file or * directory for one set of observations")
-
-    elif type(ras)==list:
-        if type(ras[0])==fits.hdu.hdulist.HDUList:
-            assert ras[0][0].header['TELESCOP']=='IRIS'
-            hdulistin=True
-
-        else:
-            try:
-                ex=fits.open(ras[0])
-                assert ex[0].header['TELESCOP']=='IRIS'
-                pathlistin=True
-            except NameError:
-                raise ValueError("Must supply fits file or * directory for one set of observations")
-    else:
-        raise ValueError("Must supply fits file or * directory for one set of observations")
 
     toppath=path.dirname(path.realpath(__file__))
     with open(toppath+'/IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
@@ -154,22 +111,7 @@ def deconvolve(ras, quiet=False, save=False, limitcores=False):
     
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-
-
-    if pathlistin:
-        with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=fits.open(ras[i]), psfs=psfs, save=save) for i in range(0, len(ras))]
-            for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
-                pass 
-        out=[f for f in futures]
-    elif hdulistin:
-        with concurrent.futures.ProcessPoolExecutor(workers=nworkers) as executor:
-            futures=[executor.submit(ParDecon, rasfits=ras[i], psfs=psfs, save=save) for i in range(0, len(ras))]
-            for f in tqdm(concurrent.futures.as_completed(futures), total=len(rasdirec), disable=quiet):
-                pass
-        out=[f for f in futures]
-    else:
-        out=ParDecon(rasfits=ras, psfs=psfs, save=save)
+    out=ParDecon(rasfits=ras, psfs=psfs, save=save)
     
     if not save:
         return(out)
