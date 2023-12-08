@@ -25,7 +25,7 @@ rc=ip.radcal(raw)		   #Radiometrically calibrated
 rc_d=ip.deconvolve(rc)		   #Radiometrically calibrated and deconvolved
 ```
 
-irispreppy takes a single HDU objects. To calibrate and deconvolve, and save,
+To calibrate and deconvolve, and save,
 
 ```python
 from astropy.io import fits
