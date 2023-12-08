@@ -37,8 +37,8 @@ rc=fits.open("path/to/file_rc.fits")
 ip.deconvolve(rc, save=True)		   #Radiometrically calibrated and deconvolved
 ```
 
-
 ---
+
 More in depth documentation will be added in the future.
 
 Thank you to [Dr Graham S. Kerr](https://github.com/grahamkerr) for IRIS_SG_deconvolve.py and IRIS_SG_PSFs.pkl.
