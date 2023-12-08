@@ -89,7 +89,7 @@ def ParDecon(rasfits, psfs, save=False):
         return(hdul)
 
 
-def deconvolve(ras, save=False, limitcores=False):
+def deconvolve(ras, save=False):
     '''Function prepares input to ParDecon
     Input Paramteres: 
         ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
@@ -100,8 +100,6 @@ def deconvolve(ras, save=False, limitcores=False):
         If save=False: Deconcolved hdu(s). 
         If save=True: 0
     '''
-
-    nworkers=cpus()-int(limitcores)
 
     toppath=path.dirname(path.realpath(__file__))
     with open(toppath+'/IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
