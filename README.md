@@ -41,6 +41,12 @@ ip.deconvolve(rc, save=True)		   #Radiometrically calibrated and deconvolved
 
 More in depth documentation will be added in the future.
 
+---
+
+Acknowledgements
+
 Thank you to [Dr Graham S. Kerr](https://github.com/grahamkerr) for IRIS_SG_deconvolve.py and IRIS_SG_PSFs.pkl.
 
 Special thanks to [Dr C.M.J. Osborne](https://github.com/Goobley) for putting up with my incessant and innane questions.
+
+Makes use of the excellent WENO4 algorithm ([Janett et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...624A.104J/abstract)) implemented in Python3 [by Dr C.M.J. Osborne here](https://github.com/Goobley/Weno4Interpolation).
