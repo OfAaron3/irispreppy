@@ -44,16 +44,14 @@ def ParDecon(rasfits, psfs, save=False):
         hdr0['TDSKEW'+str(indices[key])]=scist.skew(deconlst[index], axis=None)
         hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(deconlst[index], axis=None)
 
-        flatdat=np.sort(deconlst[index].flatten())
-        hdr0['TDP01_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.01))]
-        hdr0['TDP10_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.1))]
-        hdr0['TDP25_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.25))]
-        hdr0['TDP75_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.75))]
-        hdr0['TDP90_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.9))]
-        hdr0['TDP95_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.95))]
-        hdr0['TDP98_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.98))]
-        hdr0['TDP99_'+str(indices[key])]=flatdat[int(np.round(len(flatdat)*0.99))]
-        del flatdat
+        hdr0['TDP01_'+str(indices[key])]=np.percentile(dat[key], 1)
+        hdr0['TDP10_'+str(indices[key])]=np.percentile(dat[key], 10)
+        hdr0['TDP25_'+str(indices[key])]=np.percentile(dat[key], 25)
+        hdr0['TDP75_'+str(indices[key])]=np.percentile(dat[key], 75)
+        hdr0['TDP90_'+str(indices[key])]=np.percentile(dat[key], 90)
+        hdr0['TDP95_'+str(indices[key])]=np.percentile(dat[key], 95)
+        hdr0['TDP98_'+str(indices[key])]=np.percentile(dat[key], 98)
+        hdr0['TDP99_'+str(indices[key])]=np.percentile(dat[key], 99)
 
     for ind, key in enumerate(decondict):
         if ind==0:
@@ -67,16 +65,16 @@ def ParDecon(rasfits, psfs, save=False):
     hdr0['DATAMAX']=np.max(dattot)
     hdr0['DATASKEW']=scist.skew(dattot, axis=None)
     hdr0['DATAKURT']=scist.kurtosis(dattot, axis=None)
-    flatdattot=np.sort(dattot.flatten())
-    hdr0['DATAP01']=flatdattot[int(np.round(len(flatdattot)*0.01))]
-    hdr0['DATAP10']=flatdattot[int(np.round(len(flatdattot)*0.1))]
-    hdr0['DATAP25']=flatdattot[int(np.round(len(flatdattot)*0.25))]
-    hdr0['DATAP75']=flatdattot[int(np.round(len(flatdattot)*0.75))]
-    hdr0['DATAP90']=flatdattot[int(np.round(len(flatdattot)*0.9))]
-    hdr0['DATAP95']=flatdattot[int(np.round(len(flatdattot)*0.95))]
-    hdr0['DATAP98']=flatdattot[int(np.round(len(flatdattot)*0.98))]
-    hdr0['DATAP99']=flatdattot[int(np.round(len(flatdattot)*0.99))]
-    del dattot, flatdattot #I imagine these are large, so delete them after they are no longer needed
+
+    hdr0['DATAP01']=np.percentile(dattot, 1)
+    hdr0['DATAP10']=np.percentile(dattot, 10)
+    hdr0['DATAP25']=np.percentile(dattot, 25)
+    hdr0['DATAP75']=np.percentile(dattot, 75)
+    hdr0['DATAP90']=np.percentile(dattot, 90)
+    hdr0['DATAP95']=np.percentile(dattot, 95)
+    hdr0['DATAP98']=np.percentile(dattot, 98)
+    hdr0['DATAP99']=np.percentile(dattot, 99)
+    del dattot  
 
     phdu=fits.PrimaryHDU(None, header=hdr0)
     hduls=[phdu]
