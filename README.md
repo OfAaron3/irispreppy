@@ -14,7 +14,7 @@ This remains untested on Mac. However, I expect it to work on UNIX-like OSes.
 
 tl;dr usage
 
-irispreppy takes a single HDU objects. To calibrate and deconvolve,
+irispreppy takes a single HDU object. To calibrate and deconvolve,
 
 ```python
 from astropy.io import fits
