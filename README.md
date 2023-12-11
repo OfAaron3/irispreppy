@@ -4,7 +4,7 @@ For radiometrically calibrating and PSF deconvolving IRIS data.
 To install run `pip install irispreppy`.
 
 I dislike how I need to own proprietary software (IDL) just to simply prepare my data. I use Python for my analysis, why can't I radiometrically calibrate and deconvolve with it?
-This has been a passion project of mine during my PhD. The radiometric calibration keeps itself up to date with the response files by checking https://hesperia.gsfc.nasa.gov/ssw/iris/response/ every time it is run. If it finds new files, it downloads them before continuing.
+This has been a passion project of mine during my PhD (and beyond). The radiometric calibration keeps itself up to date with the response files by checking https://hesperia.gsfc.nasa.gov/ssw/iris/response/ every time it is run. If it finds new files, it downloads them before continuing.
 
 These scripts should be general purpose and "just work". No janky hacks are present.
 
@@ -21,8 +21,8 @@ from astropy.io import fits
 import irispreppy as ip
 
 raw=fits.open("path/to/file.fits") #Raw data
-rc=ip.radcal(raw)		   #Radiometrically calibrated
-rc_d=ip.deconvolve(rc)		   #Radiometrically calibrated and deconvolved
+rc=ip.radcal(raw)		           #Radiometrically calibrated
+rc_d=ip.deconvolve(rc)		       #Radiometrically calibrated and deconvolved
 ```
 
 To calibrate and deconvolve, and save,
@@ -31,10 +31,10 @@ To calibrate and deconvolve, and save,
 from astropy.io import fits
 import irispreppy as ip
 
-raw=fits.open("path/to/file.fits") #Raw data
-ip.radcal(raw, save=True)		   #Radiometrically calibrated
-rc=fits.open("path/to/file_rc.fits")
-ip.deconvolve(rc, save=True)		   #Radiometrically calibrated and deconvolved
+raw=fits.open("path/to/file.fits")   #Raw data
+ip.radcal(raw, save=True)		     #Radiometrically calibrated
+rc=fits.open("path/to/file_rc.fits") #Radiometrically calibrated data
+ip.deconvolve(rc, save=True)	     #Radiometrically calibrated and deconvolved
 ```
 
 ---
