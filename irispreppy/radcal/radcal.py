@@ -1,13 +1,9 @@
 import datetime as dt
 from copy import deepcopy as dc
-from glob import glob as ls
-from subprocess import call as bashrun
 
+from astropy.io import fits
 import numpy as np
 import scipy.stats as scist
-from astropy.io import fits
-from scipy.io import readsav
-from tqdm import tqdm
 from weno4 import weno4
 
 from . import iris_get_response as igr
@@ -54,7 +50,7 @@ def radcal(ras, save=False, quiet=True):
 
     midtime=dt.datetime.strftime((begin+((end-begin)/2)), '%Y-%m-%dT%H:%M:%S.%fZ')
 
-    response=(igr.iris_get_response(midtime))[0]
+    response=(igr.iris_get_response(midtime, quiet=quiet))[0]
 
     ###################################
     # Find which index is FUV and NUV #

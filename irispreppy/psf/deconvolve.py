@@ -1,14 +1,10 @@
-import concurrent.futures
 import pickle
 from copy import deepcopy as dc
-from glob import glob as ls
-from os import cpu_count as cpus
 from os import path
 
 import numpy as np
 import scipy.stats as scist
 from astropy.io import fits
-from tqdm import tqdm
 
 from . import IRIS_SG_deconvolve as isd
 
@@ -28,13 +24,13 @@ def ParDecon(rasfits, psfs, save=False):
     '''
     hdr0=dc(rasfits[0].header)
     nlines=hdr0['NEXP']
-    indices={hrd0[name]: ind+1 for ind, name in enumerate(hdr0['TDESC*'])}
+    indices={hdr0[name]: ind+1 for ind, name in enumerate(hdr0['TDESC*'])}
     deconlst=[]
     for index, key in enumerate(indices):
         deconlst.append(np.zeros_like(rasfits[indices[key]].data))
         psfind=hdr0['TDET'+str(indices[key])]
         for j in range(0, nlines):
-            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=False)
+            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(deconlst[index])
         hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((deconlst[index]-np.mean(deconlst[index]))**2)/deconlst[index].size)
@@ -44,16 +40,16 @@ def ParDecon(rasfits, psfs, save=False):
         hdr0['TDSKEW'+str(indices[key])]=scist.skew(deconlst[index], axis=None)
         hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(deconlst[index], axis=None)
 
-        hdr0['TDP01_'+str(indices[key])]=np.percentile(dat[key], 1)
-        hdr0['TDP10_'+str(indices[key])]=np.percentile(dat[key], 10)
-        hdr0['TDP25_'+str(indices[key])]=np.percentile(dat[key], 25)
-        hdr0['TDP75_'+str(indices[key])]=np.percentile(dat[key], 75)
-        hdr0['TDP90_'+str(indices[key])]=np.percentile(dat[key], 90)
-        hdr0['TDP95_'+str(indices[key])]=np.percentile(dat[key], 95)
-        hdr0['TDP98_'+str(indices[key])]=np.percentile(dat[key], 98)
-        hdr0['TDP99_'+str(indices[key])]=np.percentile(dat[key], 99)
+        hdr0['TDP01_'+str(indices[key])]=np.percentile(deconlst[index], 1)
+        hdr0['TDP10_'+str(indices[key])]=np.percentile(deconlst[index], 10)
+        hdr0['TDP25_'+str(indices[key])]=np.percentile(deconlst[index], 25)
+        hdr0['TDP75_'+str(indices[key])]=np.percentile(deconlst[index], 75)
+        hdr0['TDP90_'+str(indices[key])]=np.percentile(deconlst[index], 90)
+        hdr0['TDP95_'+str(indices[key])]=np.percentile(deconlst[index], 95)
+        hdr0['TDP98_'+str(indices[key])]=np.percentile(deconlst[index], 98)
+        hdr0['TDP99_'+str(indices[key])]=np.percentile(deconlst[index], 99)
 
-    for ind, key in enumerate(decondict):
+    for ind, _ in enumerate(deconlst):
         if ind==0:
             dattot=deconlst[ind] #Needed for header stuff. (DATa TOTal)
         else:

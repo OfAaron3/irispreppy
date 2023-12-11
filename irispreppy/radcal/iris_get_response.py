@@ -4,7 +4,6 @@ import urllib.request
 from datetime import datetime as dt
 from glob import glob as ls
 from os import path, remove
-import http.client
 
 import numpy as np
 from astropy.time import Time
@@ -13,7 +12,7 @@ from scipy.interpolate import interp1d
 from scipy.io import readsav
 
 
-def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), version=0, response_file=None, pre_launch=False, full=False, angstrom=False):
+def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), version=0, response_file=None, pre_launch=False, full=False, angstrom=False, quiet=False):
     '''Intended to use in place of iris_get_response.pro
     Input Parameters:
         date: Time or time list. Default is now.
@@ -22,6 +21,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         pre_launch: Not sure why this is in the original, but it is analaguous to version=2. Default is False.
         full: Full effective area structure is returned with cryptic coefficients. Default is False.
         angstrom: If True, lambda is returned in angstroms. If False, lambda is retunred in nm. Default is False.
+        quiet: If true, prints messages about contacting hesperia
 
     Notes:
         1. version, response_file, and prelaunch all perform the same function, here is their precedence,
@@ -47,7 +47,8 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         for tags in htmlsoup.find_all('a'):
             href=tags.get('href')
             if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
-                print("New response file found, "+href+'.\nDownloading...')
+                if not quiet:
+                    print("New response file found, "+href+'.\nDownloading...')
                 urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
                 newgeny=readsav('temp.geny')
                 remove('temp.geny')
@@ -58,25 +59,30 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
                 resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
                 resps.sort()
     except urllib.error.URLError:
-        print("You are not connected to the internet. Cannot check for new response files.")
+        if not quiet:
+            print("You are not connected to the internet. Cannot check for new response files.")
     except:
-        print("Hesperia is reachable but not loading. Cannot check for new response files.")
+        if not quiet:
+            print("Hesperia is reachable but not loading. Cannot check for new response files.")
 
     #0a Opening correct file
     if pre_launch:
         response=resps[1] #0 indexing
     elif version!=0:
         if version<=0:
-            print("No such version of response file. Defaulting to most recent version.")
+            if not quiet:
+                print("No such version of response file. Defaulting to most recent version.")
             response=resps[-1]
         elif version<=len(resps):
             response=resps[version-1]
         else:
-            print("Requested version of response file not found. Defaulting to most recent version.")
+            if not quiet:
+                print("Requested version of response file not found. Defaulting to most recent version.")
             response=resps[-1]
     elif response_file!=None:
         if toppath+"/responses/"+response_file not in resps:
-            print(response_file+" not found. Using most recent file.")
+            if not quiet:
+                print(response_file+" not found. Using most recent file.")
             response=resps[-1]
         else:
             response="./responses/"+response_file

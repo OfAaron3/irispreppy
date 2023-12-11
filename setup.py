@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 setup(name='irispreppy',
-      version="2.0.0",
+      version="2.0.1",
       url='https://github.com/OfAaron3/irispreppy',
       author='Aaron W. Peat',
       author_email='aaron.peat@uwr.edu.pl',
@@ -14,7 +14,6 @@ setup(name='irispreppy',
       packages=['irispreppy.psf', 'irispreppy.radcal', 'irispreppy', 'irispreppy.radcal.responses'],
       install_requires=[
           'numpy',
-          'tqdm',
           'astropy',
           'scipy',
           'beautifulsoup4',
