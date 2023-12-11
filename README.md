@@ -21,8 +21,8 @@ from astropy.io import fits
 import irispreppy as ip
 
 raw=fits.open("path/to/file.fits") #Raw data
-rc=ip.radcal(raw)		           #Radiometrically calibrated
-rc_d=ip.deconvolve(rc)		       #Radiometrically calibrated and deconvolved
+rc=ip.radcal(raw)                  #Radiometrically calibrated
+rc_d=ip.deconvolve(rc)             #Radiometrically calibrated and deconvolved
 ```
 
 To calibrate and deconvolve, and save,
@@ -32,7 +32,7 @@ from astropy.io import fits
 import irispreppy as ip
 
 raw=fits.open("path/to/file.fits")   #Raw data
-ip.radcal(raw, save=True)		     #Radiometrically calibrated
+ip.radcal(raw, save=True)            #Radiometrically calibrated
 rc=fits.open("path/to/file_rc.fits") #Radiometrically calibrated data
 ip.deconvolve(rc, save=True)	     #Radiometrically calibrated and deconvolved
 ```
