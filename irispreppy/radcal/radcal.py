@@ -217,50 +217,73 @@ def radcal(ras, save=False, quiet=True):
         print("(This may take some time as it needs to recalculate the excessive amount of stats in the headers)")
 
 
-    hdr0=dc(rasfits[0].header)
+    hdr0=rasfits[0].header
     hdr0['HISTORY']='NUV and FUV radiometric calibration performed on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['BUNIT']="erg s^-1 cm^-2 angstrom^-1 sr^-1"
     dat={}
     hdrdict={}
 
+    if hdr0['NEXP']>64:
+        large=True
+        for key in rcfs:
+            rcfs[key]=(rcfs[key]).astype(np.float32)
+        hdr0['HISTORY']='float32 radiometric calibration factors were used'
+    else:
+        large=False
+
+
     for key in indices: 
         if key!='fdNUV' and key!='fdFUV': #Not full disc
+            dat[key]=rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]]*rcfs[key][None, None, :]
+            if large:
+                fname="./"+key.replace(' ', '_')+".npy"
+                np.save(fname, dat[key])
+                dat[key]=np.load(fname, mmap_mode='r')
 
-            dat[key]=dc(rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]])*rcfs[key][None, None, :]
-
-            hdrdict[key]=dc(rasfits[indices[key]].header)
+            hdrdict[key]=rasfits[indices[key]].header
             hdrdict[key]['CRVAL1']=wvlns[key][lamwin[key][0]]
             hdrdict[key]['NAXIS1']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
             hdr0['TWMIN'+str(indices[key])]=wvlns[key][lamwin[key][0]]
             hdr0['TWMAX'+str(indices[key])]=wvlns[key][lamwin[key][1]]
             hdr0['TDMEAN'+str(indices[key])]=np.mean(dat[key])
-            hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((dat[key]-np.mean(dat[key]))**2)/dat[key].size)
-            hdr0['TDMEDN'+str(indices[key])]=np.median(dat[key])
-            hdr0['TDMIN'+str(indices[key])]=np.min(dat[key])
-            hdr0['TDMAX'+str(indices[key])]=np.max(dat[key])
-            hdr0['TDSKEW'+str(indices[key])]=scist.skew(dat[key], axis=None)
-            hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(dat[key], axis=None)
-            
-            hdr0['TDP01_'+str(indices[key])]=np.percentile(dat[key], 1)
-            hdr0['TDP10_'+str(indices[key])]=np.percentile(dat[key], 10)
-            hdr0['TDP25_'+str(indices[key])]=np.percentile(dat[key], 25)
-            hdr0['TDP75_'+str(indices[key])]=np.percentile(dat[key], 75)
-            hdr0['TDP90_'+str(indices[key])]=np.percentile(dat[key], 90)
-            hdr0['TDP95_'+str(indices[key])]=np.percentile(dat[key], 95)
-            hdr0['TDP98_'+str(indices[key])]=np.percentile(dat[key], 98)
-            hdr0['TDP99_'+str(indices[key])]=np.percentile(dat[key], 99)
+            if not large: #RMS
+                hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((dat[key]-np.mean(dat[key]))**2)/dat[key].size)
+            else:
+                rsum=0
+                mean=hdr0['TDMEAN'+str(indices[key])]
+                for j in range(0, int(np.ceil(rasfits[indices[key]].shape[0]/64))):
+                    rsum+=np.sum((dat[key][64*j:64*(j+1)]-mean)**2)
+                hdr0['TDRMS'+str(indices[key])]=np.sqrt(rsum/dat[key].size)
 
+            print("Median")
+            hdr0['TDMEDN'+str(indices[key])]=np.median(dat[key])
+            print("Min")
+            hdr0['TDMIN'+str(indices[key])]=np.min(dat[key])
+            print("Max")
+            hdr0['TDMAX'+str(indices[key])]=np.max(dat[key])
+            print("Skew")
+            hdr0['TDSKEW'+str(indices[key])]=scist.skew(dat[key], axis=None)
+            print("Kurtosis")
+            hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(dat[key], axis=None)           
+            p_results=np.percentile(dat[key], (1, 10, 25, 75, 90, 95, 98, 99))
+            for entry, ptile in zip((1, 10, 25, 75, 90, 95, 98, 99), p_results):
+                hdr0[f"TDP{entry:02d}_{str(indices[key])}"]=ptile
+            
+            if key=='Mg II k 2796':
+                import pdb 
+                pdb.set_trace()
+                1/0
 
         else: #Full disc
-            dat[key]=dc(rasfits[indices[key]].data[lamwin[key][0]:lamwin[key][1]])*rcfs[key][:, None, None]
+            dat[key]=rasfits[indices[key]].data[lamwin[key][0]:lamwin[key][1]]*rcfs[key][:, None, None]
 
-            hdrdict[key]=dc(rasfits[indices[key]].header)
+            hdrdict[key]=rasfits[indices[key]].header
             hdrdict[key]['CRVAL3']=wvlns[key][lamwin[key][0]]
             hdrdict[key]['NAXIS3']=lamwin[key][1]-lamwin[key][0]+1 #Counting "0", of course
 
-
+    print("Full raster stats")
     if key!='fdNUV' and key!='fdFUV': #Not full disc
         for ind, key in enumerate(dat):
             if ind==0:
@@ -275,14 +298,9 @@ def radcal(ras, save=False, quiet=True):
         hdr0['DATASKEW']=scist.skew(dattot, axis=None)
         hdr0['DATAKURT']=scist.kurtosis(dattot, axis=None)
 
-        hdr0['DATAP01']=np.percentile(dattot, 1)
-        hdr0['DATAP10']=np.percentile(dattot, 10)
-        hdr0['DATAP25']=np.percentile(dattot, 25)
-        hdr0['DATAP75']=np.percentile(dattot, 75)
-        hdr0['DATAP90']=np.percentile(dattot, 90)
-        hdr0['DATAP95']=np.percentile(dattot, 95)
-        hdr0['DATAP98']=np.percentile(dattot, 98)
-        hdr0['DATAP99']=np.percentile(dattot, 99)
+        p_results=np.percentile(dattot, (1, 10, 25, 75, 90, 95, 98, 99))
+        for entry, ptile in zip((1, 10, 25, 75, 90, 95, 98, 99), p_results):
+            hdr0[f"DATAP{entry:02d}"]=ptile
 
         del dattot 
 
@@ -295,7 +313,7 @@ def radcal(ras, save=False, quiet=True):
         phdu=fits.PrimaryHDU(dat[list(indices.keys())[0]], header=hdrdict[list(indices.keys())[0]])
         hduls=[phdu]
         for hds in range(1, len(rasfits)):
-            hduls.append(dc(rasfits[hds]))
+            hduls.append(rasfits[hds])
 
     hdul=fits.HDUList(hduls)
     hdul.verify('fix')
