@@ -257,15 +257,10 @@ def radcal(ras, save=False, quiet=True):
                     rsum+=np.sum((dat[key][64*j:64*(j+1)]-mean)**2)
                 hdr0['TDRMS'+str(indices[key])]=np.sqrt(rsum/dat[key].size)
 
-            print("Median")
             hdr0['TDMEDN'+str(indices[key])]=np.median(dat[key])
-            print("Min")
             hdr0['TDMIN'+str(indices[key])]=np.min(dat[key])
-            print("Max")
             hdr0['TDMAX'+str(indices[key])]=np.max(dat[key])
-            print("Skew")
             hdr0['TDSKEW'+str(indices[key])]=scist.skew(dat[key], axis=None)
-            print("Kurtosis")
             hdr0['TDKURT'+str(indices[key])]=scist.kurtosis(dat[key], axis=None)           
             p_results=np.percentile(dat[key], (1, 10, 25, 75, 90, 95, 98, 99))
             for entry, ptile in zip((1, 10, 25, 75, 90, 95, 98, 99), p_results):
