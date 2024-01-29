@@ -3,6 +3,7 @@ from copy import deepcopy as dc
 
 from astropy.io import fits
 import numpy as np
+from os import path
 import scipy.stats as scist
 from weno4 import weno4
 
