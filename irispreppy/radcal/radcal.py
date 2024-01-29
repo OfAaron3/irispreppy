@@ -225,15 +225,6 @@ def radcal(ras, save=False, quiet=True):
     dat={}
     hdrdict={}
 
-    if hdr0['NEXP']>64:
-        large=True
-        for key in rcfs:
-            rcfs[key]=(rcfs[key]).astype(np.float32)
-        hdr0['HISTORY']='float32 radiometric calibration factors were used'
-    else:
-        large=False
-
-
     for key in indices: 
         if key!='fdNUV' and key!='fdFUV': #Not full disc
             dat[key]=rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]]*rcfs[key][None, None, :]
@@ -267,11 +258,6 @@ def radcal(ras, save=False, quiet=True):
             for entry, ptile in zip((1, 10, 25, 75, 90, 95, 98, 99), p_results):
                 hdr0[f"TDP{entry:02d}_{str(indices[key])}"]=ptile
             
-            if key=='Mg II k 2796':
-                import pdb 
-                pdb.set_trace()
-                1/0
-
         else: #Full disc
             dat[key]=rasfits[indices[key]].data[lamwin[key][0]:lamwin[key][1]]*rcfs[key][:, None, None]
 
