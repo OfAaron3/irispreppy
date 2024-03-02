@@ -11,7 +11,7 @@ from . import iris_get_response as igr
 
 #################################################################
 
-def radcal(ras, save=False, quiet=True):
+def radcal(ras, save=False, quiet=True, err=False):
     '''Radiometric Calibration of IRIS files
     Input Paramaters:
         ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
@@ -21,6 +21,8 @@ def radcal(ras, save=False, quiet=True):
         If save=False: Calibrated hdu
         If save=True: 0
     '''
+    if err and save:
+        raise NotImplementedError("Save and Err cannot both be True.")
 
     if type(ras)==fits.hdu.hdulist.HDUList:
         if 'TELESCOP' not in ras[0].header:
@@ -299,9 +301,31 @@ def radcal(ras, save=False, quiet=True):
 
     hdul=fits.HDUList(hduls)
     hdul.verify('fix')
+
+    if err and ('fdNUV' not in indices):
+        #Only for rasters currently
+        #3.1 and 1.2 are the dark current values quoted in DN in "De Pontieu et al. 2014, Solar Physics, 289, 2733"
+        dark={'FUV':3.1*response['DN2PHOT_SG'][FUVind], 'NUV':1.2*response['DN2PHOT_SG'][NUVind]}
+        errs={}
+        for i, key in enumerate(indices):
+            temp=rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]]
+            if 'FUV' in rasfits[0].header['TDET'+str(indices[key])]:
+                dd=dark['FUV']
+                d2p=d2pFUV
+            else:
+                dd=dark['NUV']
+                d2p=d2pNUV
+            ph=temp*d2p 
+            ph[ph<0]=0
+            #Everything here is just a constant, so just multiply
+            errs[i+1]=(np.sqrt(ph+dd**2))*np.abs(rcfs[key][None, None, :])
+
     if save:
         hdul.writeto(path.splitext(rasfits.filename())[0]+'_rc.fits')
         return(0)
     else:
-        return(hdul)             
+        if err:
+            return(hdul, errs)
+        else:
+            return(hdul)             
             
