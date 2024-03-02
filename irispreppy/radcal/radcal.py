@@ -11,7 +11,7 @@ from . import iris_get_response as igr
 
 #################################################################
 
-def radcal(ras, save=False, quiet=True, err=False):
+def radcal(ras, save=False, quiet=True, error=False):
     '''Radiometric Calibration of IRIS files
     Input Paramaters:
         ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
@@ -300,7 +300,7 @@ def radcal(ras, save=False, quiet=True, err=False):
     hdul=fits.HDUList(hduls)
     hdul.verify('fix')
 
-    if err and ('fdNUV' not in indices):
+    if error and ('fdNUV' not in indices):
         #Only for rasters currently
         #3.1 and 1.2 are the dark current values quoted in DN in "De Pontieu et al. 2014, Solar Physics, 289, 2733"
         dark={'FUV':3.1*response['DN2PHOT_SG'][FUVind], 'NUV':1.2*response['DN2PHOT_SG'][NUVind]}
@@ -329,14 +329,14 @@ def radcal(ras, save=False, quiet=True, err=False):
                 hdulse.append(fits.ImageHDU(errs[i+1], header=hdrdicte[key]))
             hdule=fits.HDUList(hdulse)
             hdule.verify('fix')  
-            
+
     if save:
-        if err and ('fdNUV' not in indices):
+        if error and ('fdNUV' not in indices):
             hdule.writeto(path.splitext(rasfits.filename())[0]+'_rce.fits')
         hdul.writeto(path.splitext(rasfits.filename())[0]+'_rc.fits')
         return(0)
     else:
-        if err and ('fdNUV' not in indices):
+        if error and ('fdNUV' not in indices):
             return(hdul, errs)
         else:
             return(hdul)             
