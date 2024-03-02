@@ -21,8 +21,6 @@ def radcal(ras, save=False, quiet=True, err=False):
         If save=False: Calibrated hdu
         If save=True: 0
     '''
-    if err and save:
-        raise NotImplementedError("Save and Err cannot both be True.")
 
     if type(ras)==fits.hdu.hdulist.HDUList:
         if 'TELESCOP' not in ras[0].header:
@@ -319,12 +317,26 @@ def radcal(ras, save=False, quiet=True, err=False):
             ph[ph<0]=0
             #Everything here is just a constant, so just multiply
             errs[i+1]=(np.sqrt(ph+dd**2))*np.abs(rcfs[key][None, None, :])
-
+        if save:
+            hdr0e={i:rasfits[0].header[i] for i in rasfits[0].header['TDESC*']}
+            phdue=fits.PrimaryHDU(None, header=fits.Header(hdr0e))
+            hdulse=[phdue]
+            hdrdicte=dc(hdrdict)
+            for i in hdrdicte:
+                for j in hdrdicte[i]['PC*']:
+                    del hdrdicte[i][j]
+            for i, key in enumerate(indices):
+                hdulse.append(fits.ImageHDU(errs[i+1], header=hdrdicte[key]))
+            hdule=fits.HDUList(hdulse)
+            hdule.verify('fix')  
+            
     if save:
+        if err and ('fdNUV' not in indices):
+            hdule.writeto(path.splitext(rasfits.filename())[0]+'_rce.fits')
         hdul.writeto(path.splitext(rasfits.filename())[0]+'_rc.fits')
         return(0)
     else:
-        if err:
+        if err and ('fdNUV' not in indices):
             return(hdul, errs)
         else:
             return(hdul)             
