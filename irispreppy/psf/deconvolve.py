@@ -27,7 +27,6 @@ def ParDecon(rasfits, psfs, save=False):
     nlines=hdr0['NEXP']
     indices={hdr0[name]: ind+1 for ind, name in enumerate(hdr0['TDESC*'])}
     deconlst=[]
-    print("Correct")
     for index, key in enumerate(indices):
         deconlst.append(np.zeros_like(rasfits[indices[key]].data))
         psfind=hdr0['TDET'+str(indices[key])]
