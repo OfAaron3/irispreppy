@@ -29,8 +29,11 @@ def ParDecon(rasfits, psfs, save=False):
     for index, key in enumerate(indices):
         deconlst.append(np.zeros_like(rasfits[indices[key]].data))
         psfind=hdr0['TDET'+str(indices[key])]
+        ydelt=rasfits[indices[key]].header['CDELT2']
+        psflen=len(psfs[psfind])*(1/6)
+        newpsf=weno4(np.arange(0, psflen, ydelt), np.arange(0, psflen, 1/6), psfs[psfind])
         for j in range(0, nlines):
-            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psfs[psfind], fft_div=True)
+            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=newpsf, fft_div=True)
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(deconlst[index])
         hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((deconlst[index]-np.mean(deconlst[index]))**2)/deconlst[index].size)
