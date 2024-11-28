@@ -100,7 +100,8 @@ def deconvolve(ras, save=False):
         If save=False: Deconcolved hdu(s). 
         If save=True: 0
     '''
-
+    if ras[0].header['NAXIS']!=0: #FD mosaic
+        raise ValueError("PSF deconvolution of full disc mosaics is not possible.")
     toppath=path.dirname(path.realpath(__file__))
     with open(toppath+'/IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
         psfsin=pickle.load(psfpkl)
