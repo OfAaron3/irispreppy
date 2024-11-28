@@ -2,12 +2,7 @@ import numpy as np
 import scipy.fft as fft
 
 
-def IRIS_SG_deconvolve(data_in, psf, 
-                       iterations=10, 
-                       fft_div=False,
-                       ):
-
-
+def IRIS_SG_deconvolve(data_in, psf, iterations=10, fft_div=False):
     '''
 
     Graham S. Kerr
@@ -30,7 +25,6 @@ def IRIS_SG_deconvolve(data_in, psf,
     History
     GSK 2020: Code translated
     '''
-
 
     #Remove negative values 
     dcvim = data_in.copy()
@@ -70,7 +64,7 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
   
     #length of input psf
     psflen = len(psfin)
-    
+
     #dimensions of input data
     imsize = datain.shape
     
@@ -81,7 +75,7 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
     if ydiff < 0:
         pin=psfin[-(ydiff//2):ydiff//2+ydiff%2]
         #renormalize PSF (dx=1)
-        pin = pin/np.sum(pin) 
+        pin = pin/(np.sum(pin))
         
     #Pad the PSF if it is too short
     if ydiff > 0:
@@ -89,11 +83,11 @@ def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
         pin=np.pad(psfin, [rs, rs+ydiff%2], 'edge')
         #Use edge values or you get a divide by zero error
         #renormalize PSF (dx=1)
-        pin = pin/np.sum(pin) 
-    
+        pin = pin/(np.sum(pin))
+
     #Replicate the PSF over wavelength array also
     pin_full = (np.repeat(pin, imsize[1])).reshape(len(pin), imsize[1])
-
+    
     #Shift PSF center to zero to center output (slicing instead of rolling)
     pin_full = np.concatenate([pin_full[imsize[0]//2:], pin_full[:imsize[0]//2]])
 

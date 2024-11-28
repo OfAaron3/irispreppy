@@ -5,7 +5,6 @@ from os import path
 import numpy as np
 import scipy.stats as scist
 from astropy.io import fits
-from weno4 import weno4
 
 from . import IRIS_SG_deconvolve as isd
 
@@ -30,11 +29,14 @@ def ParDecon(rasfits, psfs, save=False):
     for index, key in enumerate(indices):
         deconlst.append(np.zeros_like(rasfits[indices[key]].data))
         psfind=hdr0['TDET'+str(indices[key])]
-        ydelt=rasfits[indices[key]].header['CDELT2']
-        psflen=len(psfs[psfind])*(1/6)
-        newpsf=weno4(np.arange(0, psflen, ydelt), np.arange(0, psflen, 1/6), psfs[psfind])
+        sbf=int(np.round(rasfits[indices[key]].header['CDELT2']*6))
+        if sbf!=1:
+            psf=psfs[psfind]
+            psf2use=np.array([np.sum(psf[i*sbf:i*sbf+sbf]) for i in range(0, int(len(psf)/sbf))])
+        else:
+            psf2use=psfs[psfind]
         for j in range(0, nlines):
-            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=newpsf, fft_div=True)
+            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psf2use, fft_div=True)
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(deconlst[index])
         hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((deconlst[index]-np.mean(deconlst[index]))**2)/deconlst[index].size)
