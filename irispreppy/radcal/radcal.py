@@ -80,6 +80,21 @@ def radcal(ras, save=False, quiet=True, error=False):
         else:
             indices={'fdFUV':0}    
 
+    ##########
+    # Blanks #
+    ##########
+
+    if not list(indices.keys())[0][:2]=='fd':
+        #Blanks not to be removed from fd mosiacs
+        #Piggybacking off the last if a little, but it's probably okay
+        blanks={}
+        for key in indices:
+            blanks[key]=[]
+            for yy in range(0, rasfits[indices[key]].header['NAXIS2']):
+                if (rasfits[indices[key]].data[:,yy]==-200).all():
+                    blanks[key].append(yy)
+
+
     ###################
     # Wavelength axes #
     ###################
@@ -232,6 +247,7 @@ def radcal(ras, save=False, quiet=True, error=False):
                 fname="./"+key.replace(' ', '_')+".npy"
                 np.save(fname, dat[key])
                 dat[key]=np.load(fname, mmap_mode='r')
+            dat[:,blanks[key]]=-200 #Reblanking the blanks
 
             hdrdict[key]=rasfits[indices[key]].header
             hdrdict[key]['CRVAL1']=wvlns[key][lamwin[key][0]]

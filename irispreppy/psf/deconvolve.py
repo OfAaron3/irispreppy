@@ -81,6 +81,9 @@ def ParDecon(rasfits, psfs, save=False):
     phdu=fits.PrimaryHDU(None, header=hdr0)
     hduls=[phdu]
     for index, key in enumerate(indices):
+        for yy in range(0, rasfits[indices[key]].header['NAXIS2']):
+            if (rasfits[indices[key]].data[:,yy]<0).all():
+                deconlst[index][:,yy]=-200 #Reblanking the blanks
         hduls.append(fits.ImageHDU(deconlst[index], header=rasfits[indices[key]].header))
     hdul=fits.HDUList(hduls)  
 
