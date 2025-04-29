@@ -11,7 +11,7 @@ from . import IRIS_SG_deconvolve as isd
 #There are two functions here
 
 
-def ParDecon(rasfits, psfs, save=False):
+def decon(rasfits, psfs, save=False):
     '''Function acts as a wrapper around IRIS_SG_deconvolve
     Input Paramteres: 
         rasfits: The hdu to be deconvolved
@@ -111,9 +111,16 @@ def deconvolve(ras, save=False):
     with open(toppath+'/IRIS_SG_PSFs.pkl', 'rb') as psfpkl:
         psfsin=pickle.load(psfpkl)
     
+    if ras[0].header['HISTORY'][-1][:-11]=='FITS made with astropy on':
+        from datetime import datetime as dt
+        import warnings
+        if dt.strptime(ras[0].header['HISTORY'][-1][-10:], '%Y-%m-%d')<dt.strptime('2025-04-29', '%Y-%m-%d'):
+            warnings.warn("Future versions of deconvolve.py may behave unexpectedly with rasters calibrated before 2025-04-29. If you plan to deconvolve again, please calibrate again", UserWarning)
+            
+
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-    out=ParDecon(rasfits=ras, psfs=psfs, save=save)
+    out=decon(rasfits=ras, psfs=psfs, save=save)
     
     if not save:
         return(out)
