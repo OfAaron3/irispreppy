@@ -39,7 +39,7 @@ ip.deconvolve(rc, save=True)	     #Radiometrically calibrated and deconvolved
 
 ---
 
-More in depth documentation will be added in the future(TM).
+More in depth documentation will be added in the future<sup>TM</sup>.
 
 ---
 
