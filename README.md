@@ -8,8 +8,6 @@ This has been a passion project of mine during my PhD (and beyond). The radiomet
 
 These scripts should be general purpose and "just work". No janky hacks are present.
 
-This remains untested on Mac. However, I expect it to work on UNIX-like OSes.
-
 ---
 
 tl;dr usage
