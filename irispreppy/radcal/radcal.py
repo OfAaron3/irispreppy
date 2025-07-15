@@ -238,6 +238,7 @@ def radcal(ras, save=False, quiet=True, error=False):
     hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['BUNIT']="erg s^-1 cm^-2 angstrom^-1 sr^-1"
     dat={}
+    hdrdict={}
     for key in indices: 
         if key!='fdNUV' and key!='fdFUV': #Not full disc
             dat[key]=rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]]*rcfs[key][None, None, :]
