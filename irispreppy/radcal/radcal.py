@@ -238,16 +238,10 @@ def radcal(ras, save=False, quiet=True, error=False):
     hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['BUNIT']="erg s^-1 cm^-2 angstrom^-1 sr^-1"
     dat={}
-    hdrdict={}
-    large=False
     for key in indices: 
         if key!='fdNUV' and key!='fdFUV': #Not full disc
             dat[key]=rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]]*rcfs[key][None, None, :]
-            if large:
-                fname="./"+key.replace(' ', '_')+".npy"
-                np.save(fname, dat[key])
-                dat[key]=np.load(fname, mmap_mode='r')
-            dat[:,blanks[key]]=-200 #Reblanking the blanks
+            dat[key][:,blanks[key]]=-200 #Reblanking the blanks
 
             hdrdict[key]=rasfits[indices[key]].header
             hdrdict[key]['CRVAL1']=wvlns[key][lamwin[key][0]]
@@ -256,14 +250,11 @@ def radcal(ras, save=False, quiet=True, error=False):
             hdr0['TWMIN'+str(indices[key])]=wvlns[key][lamwin[key][0]]
             hdr0['TWMAX'+str(indices[key])]=wvlns[key][lamwin[key][1]]
             hdr0['TDMEAN'+str(indices[key])]=np.mean(dat[key])
-            if not large: #RMS
-                hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((dat[key]-np.mean(dat[key]))**2)/dat[key].size)
-            else:
-                rsum=0
-                mean=hdr0['TDMEAN'+str(indices[key])]
-                for j in range(0, int(np.ceil(rasfits[indices[key]].shape[0]/64))):
-                    rsum+=np.sum((dat[key][64*j:64*(j+1)]-mean)**2)
-                hdr0['TDRMS'+str(indices[key])]=np.sqrt(rsum/dat[key].size)
+            rsum=0
+            mean=hdr0['TDMEAN'+str(indices[key])]
+            for j in range(0, int(np.ceil(rasfits[indices[key]].shape[0]/64))):
+                rsum+=np.sum((dat[key][64*j:64*(j+1)]-mean)**2)
+            hdr0['TDRMS'+str(indices[key])]=np.sqrt(rsum/dat[key].size)
 
             hdr0['TDMEDN'+str(indices[key])]=np.median(dat[key])
             hdr0['TDMIN'+str(indices[key])]=np.min(dat[key])
