@@ -124,7 +124,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
         rr[:,j]=fit_iris_xput_lite(date, r['c_f_time'], r['coeffs_fuv'][j])
     #; interpolate onto lambda grid, separately for each of the two FUV CCDs
     for j in range(0, 2):
-        w=np.where((r['lambda']>=lamran[j][0]) & (r['lambda']<=lamran[j][1]))
+        w=(r['lambda']>=lamran[j][0]) & (r['lambda']<=lamran[j][1])
         for k in range(0, ntt):
             interp=interp1d(r['c_f_lambda'][j:j+2], rr[k, j:j+2], fill_value='extrapolate')
             #If you feel uneasy about this extrapolation, this is how iris_get_resposne.pro works implicitly
@@ -141,7 +141,7 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
     for j in range(0, sz[0]):
         rr[:,j]=fit_iris_xput_lite(date, r['c_n_time'], r['coeffs_nuv'][j])
     #; interpolate onto lambda grid
-    w=np.where((r['lambda']>=lamran[0]) & (r['lambda']<=lamran[1]))
+    w=(r['lambda']>=lamran[0]) & (r['lambda']<=lamran[1])
     if int(r['version'])<3:
         for k in range(0, ntt):
             interp=interp1d(r['c_n_lambda'], rr[k], fill_value='extrapolate')
@@ -230,11 +230,12 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
 
     History:
         2021-12-14 - A.W.Peat - Translated from IDL
+        2025-08-12 - A.W.Peat - Numpy deprecation issue fixed
     '''
     tex=1.5 # ; exponent for transition between exp.decay intervals
     if tcc0.shape[1]!=2:
-        raise RuntimeError("Incorrect number of elements in tcoef (tcco)")
-    m=tcc0.size//2
+        raise RuntimeError("Incorrect number of elements in tcoef (tcc0)")
+    m=tcc0.shape[0]
     #This is crazy. Originally here they did 
     #m=size(tcc0); if m[1] ne 2; return, 0; endif; m=m[m[0]+2]/2.
 
@@ -249,7 +250,6 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
          
     if ccc.size!=3*m:
         raise RuntimeError("Incorrect number of elements in tcoef (tcco)")
-
     # ; calculation of output fit
     ee=ccc[:,2] 
     a=np.zeros((ntt, 2*m)) #; base vector
@@ -257,11 +257,11 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     for j in range(0, m):
         # ; base vector for interval of constant multiplier
         if j>0:
-            ww=np.where((tt>=tcc[j, 0]) & (tt<=tcc[j, 1]))
-            nww=len(ww)
+            nww=int((tt>=tcc[j, 0]) & (tt<=tcc[j, 1]))
+            ww=nww-1
         else:
-            ww=np.where(tt<=tcc[j,1])
-            nww=len(ww)
+            nww=int(tt<=tcc[j,1])
+            ww=nww-1
 
         if nww>0:
             a[ww, 2*j]=1
@@ -269,8 +269,8 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
         # ; base vector for interval when multiplier is linear function of time
         # Sometimes dtt<0, so have to NaN it before the power to stop a warning
         if j>0:
-            ww=np.where((tt>tcc[j-1,1]) & (tt < tcc[j,0]))
-            nww=len(ww)
+            nww=int((tt>tcc[j-1,1]) & (tt < tcc[j,0]))
+            ww=nww-1
             if nww>0:
                 dtt=(tt-tcc[j-1,1])/(tcc[j,0]-tcc[j-1, 1])
                 if dtt<0:
@@ -278,8 +278,8 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
                 a[ww, 2*j]=dtt**tex
                 a[ww, 2*j+1]=dtt**tex*np.exp(ee[j]*(tt-tcc[j,0]))
         if j < (m-1):
-            ww=np.where((tt>tcc[j,1]) and (tt<tcc[j+1, 0]))
-            nww=len(ww)
+            nww=int((tt>tcc[j,1]) & (tt<tcc[j+1, 0]))
+            ww=nww-1
             if nww>0:
                 dtt=(tt-tcc[j,1])/(tcc[j+1,0]-tcc[j,1])
                 if dtt<0:
