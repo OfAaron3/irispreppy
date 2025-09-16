@@ -2,7 +2,7 @@ import numpy as np
 import scipy.fft as fft
 
 
-def IRIS_SG_deconvolve(data_in, psf, iterations=10, fft_div=False):
+def IRIS_SG_deconvolve(data_in, psf, iterations, fft_div=False):
     '''
 
     Graham S. Kerr

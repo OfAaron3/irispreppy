@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 setup(name='irispreppy',
-      version="2.3.4",
+      version="2.4.0",
       url='https://github.com/OfAaron3/irispreppy',
       author='Aaron W. Peat',
       author_email='aaron.peat@uwr.edu.pl',

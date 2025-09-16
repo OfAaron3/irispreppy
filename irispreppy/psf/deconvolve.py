@@ -11,7 +11,7 @@ from . import IRIS_SG_deconvolve as isd
 #There are two functions here
 
 
-def decon(rasfits, psfs, save=False):
+def decon(rasfits, psfs, save=False, iterations=0):
     '''Function acts as a wrapper around IRIS_SG_deconvolve
     Input Paramteres: 
         rasfits: The hdu to be deconvolved
@@ -30,13 +30,18 @@ def decon(rasfits, psfs, save=False):
         deconlst.append(np.zeros_like(rasfits[indices[key]].data))
         psfind=hdr0['TDET'+str(indices[key])]
         sbf=int(np.round(rasfits[indices[key]].header['CDELT2']*6))
+        if iterations==0:
+            if psfind=='NUV':
+                iterations=50
+            else:
+                iterations=10
         if sbf!=1:
             psf=psfs[psfind]
             psf2use=np.array([np.sum(psf[i*sbf:i*sbf+sbf]) for i in range(0, int(len(psf)/sbf))])
         else:
             psf2use=psfs[psfind]
         for j in range(0, nlines):
-            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psf2use, fft_div=True)
+            deconlst[index][j]=isd.IRIS_SG_deconvolve(rasfits[indices[key]].data[j], psf=psf2use, iterations=iterations, fft_div=True)
 
         hdr0['TDMEAN'+str(indices[key])]=np.mean(deconlst[index])
         hdr0['TDRMS'+str(indices[key])]=np.sqrt(np.sum((deconlst[index]-np.mean(deconlst[index]))**2)/deconlst[index].size)
@@ -94,7 +99,7 @@ def decon(rasfits, psfs, save=False):
         return(hdul)
 
 
-def deconvolve(ras, save=False):
+def deconvolve(ras, save=False, iterations=0):
     '''Function prepares input to ParDecon
     Input Paramteres: 
         ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
@@ -120,7 +125,7 @@ def deconvolve(ras, save=False):
 
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-    out=decon(rasfits=ras, psfs=psfs, save=save)
+    out=decon(rasfits=ras, psfs=psfs, save=save, iterations=iterations)
     
     if not save:
         return(out)
