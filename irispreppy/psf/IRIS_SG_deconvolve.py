@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.fft as fft
+import warnings
 
 
 def IRIS_SG_deconvolve(data_in, psf, iterations, fft_div=False):
@@ -34,10 +35,11 @@ def IRIS_SG_deconvolve(data_in, psf, iterations, fft_div=False):
     if fft_div:
         dcvim = FFT_conv_1D(data_in,psf,div=True)
     else:
-        for ind in range(1,iterations+1):
-            step1 = data_in_zr/(FFT_conv_1D(dcvim,psf, rev_psf=False, div=False))
-            step2 = FFT_conv_1D(step1,psf, rev_psf=True)
-            dcvim = dcvim * step2
+        with warnings.catch_warnings(action="ignore"):
+            for ind in range(0,iterations):
+                step1 = data_in_zr/(FFT_conv_1D(dcvim,psf, rev_psf=False, div=False))
+                step2 = FFT_conv_1D(step1,psf, rev_psf=True)
+                dcvim = dcvim * step2
 
     return(dcvim)
 
