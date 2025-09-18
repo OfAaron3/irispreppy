@@ -8,19 +8,26 @@ from astropy.io import fits
 
 from . import IRIS_SG_deconvolve as isd
 
-#There are two functions here
 
+def decon(rasfits, psfs, iterations=0, fft=False):
+    '''
+    Wrapper around IRIS_SG_deconvolve
 
-def decon(rasfits, psfs, save=False, iterations=0, fft=False):
-    '''Function acts as a wrapper around IRIS_SG_deconvolve
-    Input Paramteres: 
-        rasfits: The hdu to be deconvolved
-        psfs: The point spread functions in a dictionary
-        save: If True: Save the files with d appended
-              If False: Return the deconvolved hdus
-    Output:
-        If save=False: Deconcolved hdu
-        If save=True: 0
+    Parameters
+    ----------
+        rasfits : astropy.io.fits.hdu.hdulist.HDUList
+            The hdu to be deconvolved
+        psfs : dict
+            The point spread functions
+        iterations : int or list
+            How many iterations to use in Richardson-Lucy deconvolution. Integer input will be applied to all ImageHDUs. List input should be a separate number of iterations for each ImageHDU. Defaults - FUV: 10, NUV: 50
+        fft : bool
+            Whether to deconvolve by division in Fourier space instead of using a Richardson-Lucy deconvolution. Default: False
+            
+    Returns
+    -------
+        hdul : astropy.io.fits.hdu.hdulist.HDUList
+            Deconvolved hdu
     '''
     hdr0=dc(rasfits[0].header)
     nlines=hdr0['NEXP']
@@ -38,7 +45,6 @@ def decon(rasfits, psfs, save=False, iterations=0, fft=False):
                     its=10
             else:
                 its=iterations
-
         elif type(iterations)==list or type(iterations)==np.ndarray:
             if len(iterations)!=len(indices):
                 ValueError('List or arrays of iterations must be same length as number of wavelength windows and in same order as in fits file.')
@@ -103,24 +109,37 @@ def decon(rasfits, psfs, save=False, iterations=0, fft=False):
         hduls.append(fits.ImageHDU(deconlst[index], header=rasfits[indices[key]].header))
     hdul=fits.HDUList(hduls)  
 
-    if save:
-        hdul.writeto(path.splitext(rasfits.filename())[0]+'d.fits')
-        return(0)
-    else:
-        return(hdul)
+    return(hdul)
 
 
-def deconvolve(ras, save=False, iterations=0, fft=False):
-    '''Function prepares input to ParDecon
-    Input Paramteres: 
-        ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
-        save: If True: Save the files with d appended
-              If False: Return the deconvolved hdus
-        limitcores: If True: use all but one core. If False use all cores. 
-    Output:
-        If save=False: Deconcolved hdu(s). 
-        If save=True: 0
+def deconvolve(ras, iterations=0, fft=False):
     '''
+    Deconvolves IRIS PSF from IRIS spectrograph files.\n
+    (See Courrier et al. 2018 for more information - DOI: 10.1007/s11207-018-1347-9)
+    
+    Parameters
+    ----------
+    ras : astropy.io.fits.hdu.hdulist.HDUList
+        Input IRIS raster
+    iterations : int or list
+        How many iterations to use in Richardson-Lucy deconvolution. Integer input will be applied to all ImageHDUs. List input should be a separate number of iterations for each ImageHDU. Defaults - FUV: 10, NUV: 50
+    fft : bool
+        Whether to deconvolve by division in Fourier space instead of using a Richardson-Lucy deconvolution. Default: False
+
+    Returns
+    -------
+    hdul : astropy.io.fits.hdu.hdulist.HDUList
+        The deconvolved data
+
+    Example
+    -------
+    >>> from astropy.io import fits
+    >>> import irispreppy as ip
+    >>> f=fits.open('iris_raster.fits')
+    >>> frc=ip.deconvolve(f)
+
+    '''
+
     if ras[0].header['NAXIS']!=0: #FD mosaic
         raise ValueError("PSF deconvolution of full disc mosaics is not possible.")
     toppath=path.dirname(path.realpath(__file__))
@@ -136,9 +155,6 @@ def deconvolve(ras, save=False, iterations=0, fft=False):
 
     psfs={'FUV1':psfsin['sg_psf_1336'], 'FUV2':psfsin['sg_psf_1394'], 'NUV':psfsin['sg_psf_2796']}      
 
-    out=decon(rasfits=ras, psfs=psfs, save=save, iterations=iterations, fft=fft)
+    out=decon(rasfits=ras, psfs=psfs, iterations=iterations, fft=fft)
     
-    if not save:
-        return(out)
-    else:
-        return(0)
+    return(out)

@@ -5,26 +5,24 @@ import warnings
 
 def IRIS_SG_deconvolve(data_in, psf, iterations, fft_div=False):
     '''
-
-    Graham S. Kerr
-    July 2020
- 
-    NAME:   IRIS_SG_Deconvolve.py
-
-    PURPOSE: Deconvolves IRIS SG data using the PSFs from Courrier et al 2018.
+    Deconvolves IRIS point spread function from IRIS spectrograph slits 
+    (See Courrier et al. 2018 for more information - DOI: 10.1007/s11207-018-1347-9)
     
-    Input Parameters: 
-        data_in    -- A 2D IRIS SG array [ypos, wavelength]
-        psf        -- The appropriate PSF
-        iterations -- The number of Richardson Lucy iterations to run through (Default = 10)
-        fft_div    -- Set to use skip iterations and instead deconvolve by division Fourier Space   
+    Parameters
+    ----------
+    data_in : array_like
+        A 2D IRIS SG array (a single slit position)
+    psf : array_like
+        The appropriate point spread function for the considered detector
+    iterations : int 
+        The number of Richardson Lucy iterations 
+    fft_div : bool 
+        Whether to deconvolve by division in Fourier space instead of using a Richardson-Lucy deconvolution. Default: False  
 
-    NOTES: Based on iris_sg_deconvolve.pro by Hans Courrier, but not all the functionality
-           is included here yet
-
-    
-    History
-    GSK 2020: Code translated
+    Returns
+    -------
+    dcvim : array_like
+        Deconvolved IRIS slit
     '''
 
     #Remove negative values 
@@ -33,35 +31,38 @@ def IRIS_SG_deconvolve(data_in, psf, iterations, fft_div=False):
     data_in_zr = dcvim
 
     if fft_div:
-        dcvim = FFT_conv_1D(data_in,psf,div=True)
+        dcvim = FFT_conv_1D(data_in, psf, div=True)
     else:
-        with warnings.catch_warnings(action="ignore"):
+        with warnings.catch_warnings(action="ignore"): #Divide by zero warnings will happen
             for ind in range(0,iterations):
-                step1 = data_in_zr/(FFT_conv_1D(dcvim,psf, rev_psf=False, div=False))
-                step2 = FFT_conv_1D(step1,psf, rev_psf=True)
-                dcvim = dcvim * step2
+                step1=data_in_zr/(FFT_conv_1D(dcvim, psf, rev_psf=False, div=False))
+                step2=FFT_conv_1D(step1, psf, rev_psf=True)
+                dcvim=dcvim*step2
 
     return(dcvim)
 
 
-def FFT_conv_1D(datain, psfin, div = False, rev_psf=False):
+def FFT_conv_1D(datain, psfin, div=False, rev_psf=False):
     
     '''   
-    Notes AWP: This is not a good docstring, will fix later.
+    Fourier Transform 1D Convolution
 
-    Input parameters  
-        datain -- a 2D data array [nominally, slit pos vs wavelength]
-        psfin  -- the PSF to be applied in the y-direction
-        div -- Set to True to divide in Fourier space (Default is False, so multiply in Fourier space)
-        rev_psf -- Set to reverse the 1D input PSF
+    Parameters
+    ---------- 
+    datain : array_like 
+        A 2D data array (IRIS slit)
+    psfin  : array_like 
+        The point spread function to be applied in the y-direction
+    div : bool 
+        Set to True to divide in Fourier space (Default is False, so multiply in Fourier space)
+    rev_psf : bool 
+        Set to reverse the 1D input PSF
               
-    Output:            
-        dataout -- the input data convolved with the PSF
+    Returns
+    -------            
+    dataout : array_like 
+        The input data convolved with the PSF
     
-    Hisotory:
-    GSK 2020: Pretty much copied exactly from Hans Courrier's IDL version in the SSW IRIS software tree, as part of iris_sg_deconvole.pro
-    AWP 2021: Code fixed
-    AWP 2023: Streamlined some of the code
     '''
   
     #length of input psf

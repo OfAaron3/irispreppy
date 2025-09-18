@@ -3,7 +3,6 @@ from copy import deepcopy as dc
 
 from astropy.io import fits
 import numpy as np
-from os import path
 import scipy.stats as scist
 from weno4 import weno4
 
@@ -11,15 +10,34 @@ from . import iris_get_response as igr
 
 #################################################################
 
-def radcal(ras, save=False, quiet=True, error=False):
-    '''Radiometric Calibration of IRIS files
-    Input Paramaters:
-        ras: astropy.io.fits.hdu.hdulist.HDUList of an IRIS observation
-        save: Save the output files in the same directory as the input file with "rc" appended to the end of the file. Default is False
-        quiet: Suppress print outputs. Default True.
-    Output:
-        If save=False: Calibrated hdu
-        If save=True: 0
+def radiometric_calibrate(ras, quiet=True, error=False):
+    '''
+    Performs radiometric calibration of IRIS spectrograph files.\n
+    (See Section 5.2 of ITN26 for more details - https://iris.lmsal.com/itn26/calibration.html#radiometric-calibration)
+    
+    Parameters
+    ----------
+    ras : astropy.io.fits.hdu.hdulist.HDUList
+        Input IRIS raster
+    quiet : bool
+        Whether to suppress print statements. Default: True
+    error : bool
+        Whether to calculate errors (beta). Ignored if `ras` is a full disc mosaic. Default: False
+
+    Returns
+    -------
+    hdul : astropy.io.fits.hdu.hdulist.HDUList
+        The calibrated data
+    hdule : astropy.io.fits.hdu.hdulist.HDUList
+        If error=True. The poissonian error and dark current on the data (beta)
+
+    Example
+    -------
+    >>> from astropy.io import fits
+    >>> import irispreppy as ip
+    >>> f=fits.open('iris_raster.fits')
+    >>> frc=ip.radiometric_calibrate(f)
+
     '''
 
     if type(ras)==fits.hdu.hdulist.HDUList:
@@ -233,7 +251,7 @@ def radcal(ras, save=False, quiet=True, error=False):
     # Radiometric Calibration #
     ###########################
     if not quiet:
-        print("Creating and saving calibrated spectrograph fits...")    
+        print("Creating calibrated spectrograph fits...")    
         print("(This may take some time as it needs to recalculate the excessive amount of stats in the headers)")
 
 
@@ -247,7 +265,6 @@ def radcal(ras, save=False, quiet=True, error=False):
     for key in indices: 
         if key!='fdNUV' and key!='fdFUV': #Not full disc
             dat[key]=rasfits[indices[key]].data[...,lamwin[key][0]:lamwin[key][1]]*rcfs[key][None, None, :]
-
 
             dat[key][:,blanks[key]]=-200 #Reblanking the blanks
 
@@ -327,27 +344,21 @@ def radcal(ras, save=False, quiet=True, error=False):
             ph[ph<0]=0
             #Everything here is just a constant, so just multiply
             errs[i+1]=(np.sqrt(ph+dd**2))*np.abs(rcfs[key][None, None, :])
-        if save:
-            hdr0e={i:rasfits[0].header[i] for i in rasfits[0].header['TDESC*']}
-            phdue=fits.PrimaryHDU(None, header=fits.Header(hdr0e))
-            hdulse=[phdue]
-            hdrdicte=dc(hdrdict)
-            for i in hdrdicte:
-                for j in hdrdicte[i]['PC*']:
-                    del hdrdicte[i][j]
-            for i, key in enumerate(indices):
-                hdulse.append(fits.ImageHDU(errs[i+1], header=hdrdicte[key]))
-            hdule=fits.HDUList(hdulse)
-            hdule.verify('fix')  
 
-    if save:
-        if error and ('fdNUV' not in indices):
-            hdule.writeto(path.splitext(rasfits.filename())[0]+'_rce.fits')
-        hdul.writeto(path.splitext(rasfits.filename())[0]+'_rc.fits')
-        return(0)
+        hdr0e={i:rasfits[0].header[i] for i in rasfits[0].header['TDESC*']}
+        phdue=fits.PrimaryHDU(None, header=fits.Header(hdr0e))
+        hdulse=[phdue]
+        hdrdicte=dc(hdrdict)
+        for i in hdrdicte:
+            for j in hdrdicte[i]['PC*']:
+                del hdrdicte[i][j]
+        for i, key in enumerate(indices):
+            hdulse.append(fits.ImageHDU(errs[i+1], header=hdrdicte[key]))
+        hdule=fits.HDUList(hdulse)
+        hdule.verify('fix')  
+
+    if error and ('fdNUV' not in indices):
+        return(hdul, hdule)
     else:
-        if error and ('fdNUV' not in indices):
-            return(hdul, errs)
-        else:
-            return(hdul)             
-            
+        return(hdul)             
+        

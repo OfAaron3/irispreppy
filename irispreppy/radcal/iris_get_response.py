@@ -2,7 +2,7 @@ import pickle
 import urllib.error
 import urllib.request
 from datetime import datetime as dt
-from glob import glob as ls
+from glob import glob
 from os import path, remove
 
 import numpy as np
@@ -12,82 +12,85 @@ from scipy.interpolate import interp1d
 from scipy.io import readsav
 
 
-def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), version=0, response_file=None, pre_launch=False, full=False, angstrom=False, quiet=False):
-    '''Intended to use in place of iris_get_response.pro
-    Input Parameters:
-        date: Time or time list. Default is now.
-        version: Which version of the response file you want. Default is newest. Version numbers are 1 indexed, so the default 0 becomes -1.
-        response_file: Name of the response file you want to use. Must exactly match, including extension.
-        pre_launch: Not sure why this is in the original, but it is analaguous to version=2. Default is False.
-        full: Full effective area structure is returned with cryptic coefficients. Default is False.
-        angstrom: If True, lambda is returned in angstroms. If False, lambda is retunred in nm. Default is False.
-        quiet: If true, prints messages about contacting hesperia
 
-    Notes:
-        1. version, response_file, and prelaunch all perform the same function, here is their precedence,
-        pre_launch>version>response_file 
-        2. Code automatically checks https://hesperia.gsfc.nasa.gov/ssw/iris/response/ for new response files. If this url
-        changes in the future, do a search and replace. The files are assumed to be geny IDL structs.
-        3. All original comments will be preceeded by ;, as is convention in IDL
-        4. Translated from iris_get_response.pro. Originally by J.P.Weulser, S.L. Freeland, and G.Chintzoglou
+def iris_get_response(date=None, version=0, response_file=None, pre_launch=False, full=False, angstrom=False, update_response=True, quiet=False):
+    """
+    Functions identically to that of `iris_get_response.pro`. Generates the IRIS response required for radiometric calibration.
 
-    History:
-        2021-12-14 - A.W.Peat - Translated from IDL and added QOL improvements
-    '''
+    Parameters
+    ----------
+    date : string
+        Date of observation. e.g. '2013-06-28T02:27:46.00Z' Default is now.
+    version : int
+        Which version of the response file you want. Default is newest. Version numbers are 1 indexed.  Default: 0 (i.e. the newest).
+    response_file : string
+        Name of the response file you want to use. Must exactly match, including extension. Else reverts to default response of the most recent.
+    pre_launch : bool 
+        Analaguous to version=2. Default: False.
+    full : bool
+        Full effective area structure is returned with cryptic coefficients. Default: False.
+    angstrom : bool
+        Whether to return lambda in angstroms. If False, lambda is returned in nm. Default: False.
+    update_response: bool
+        Whether to call `update_response_files(quiet=True)` to check for new response files before starting calibration. Default: True.
+    quiet : bool
+        Whether to suppress all print statements including messages about failing to find specified response file and reverting to default. Default: False.
 
+    Returns
+    -------
+
+    o : dict
+        IRIS response. A dict was chosen to mimic an IDL struct.
+
+    Notes
+    -----
+        In order to mimic `iris_get_response.pro`, there are three different parameters that specify the version of the response file to use. If none are set, the most recent response file will be used. Their precedence (if all are set) is:
+            `pre_launch` > `version` > `response_file`
+    
+    Example
+    -------
+    >>> from astropy.io import fits
+    >>> import irispreppy as ip
+    >>> f=fits.open('iris_raster.fits')
+    >>> frc=ip.iris_get_response(f[0].header['DATE_OBS'])
+    """
+
+    if date is None:
+        date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
     toppath=path.dirname(path.realpath(__file__))
     resppath=path.join(toppath, "responses")
-    resps=ls(path.join(resppath, "*.pkl"))
+    resps=glob(path.join(resppath, "*.pkl"))
+    
+    if update_response:
+        new=update_response_files(quiet=True)
+        if new:
+            resps=glob(path.join(resppath, "*.pkl"))
+    
     resps.sort()
-
-    #Checks for new responses everytime it is run
-    try:
-        with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
-            htmlsoup=BeautifulSoup(respurl, 'html.parser')
-        for tags in htmlsoup.find_all('a'):
-            href=tags.get('href')
-            if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
-                if not quiet:
-                    print("New response file found, "+href+'.\nDownloading...')
-                urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
-                newgeny=readsav('temp.geny')
-                remove('temp.geny')
-                recgeny=newgeny[list(newgeny.keys())[0]][0]
-                with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
-                    pickle.dump(recgeny, pklout)
-
-                resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
-                resps.sort()
-    except urllib.error.URLError:
-        if not quiet:
-            print("You are not connected to the internet. Cannot check for new response files.")
-    except:
-        if not quiet:
-            print("Hesperia is reachable but not loading. Cannot check for new response files.")
 
     #0a Opening correct file
     if pre_launch:
-        response=resps[1] #0 indexing
+        response=resps[1] #This is version 2, which is file 1.
     elif version!=0:
         if version<=0:
-            if not quiet:
+            if response_status and not quiet:
                 print("No such version of response file. Defaulting to most recent version.")
             response=resps[-1]
         elif version<=len(resps):
             response=resps[version-1]
         else:
-            if not quiet:
+            if response_status and not quiet:
                 print("Requested version of response file not found. Defaulting to most recent version.")
             response=resps[-1]
-    elif response_file!=None:
+    elif response_file is not None:
         if toppath+"/responses/"+response_file not in resps:
-            if not quiet:
+            if response_status and not quiet:
                 print(response_file+" not found. Using most recent file.")
             response=resps[-1]
         else:
             response="./responses/"+response_file
     else:
-        response=resps[version-1]
+        response=resps[-1]
 
     with open(response, "rb") as pklin:
         r=pickle.load(pklin) #Loading in the response file and calling it r
@@ -219,18 +222,23 @@ def iris_get_response(date=dt.strftime(dt.now(), '%Y-%m-%dT%H:%M:%S.%fZ'), versi
 
 def fit_iris_xput_lite(tt0, tcc0, ccc):
     '''
-    Stripped down form of fit_iris_xput.pro, using only the things 
-    get_iris_response.pro uses.
-    I am so sorry, but I have no idea what any of these keywords are.
-    The previous documentation is very cryptic. I will include ALL of their comments.
+    Stripped down form of `fit_iris_xput.pro`, with only the sections relevant to `iris_get_response.pro`.
+    I am so sorry, but I have no idea what the last two inputs are.
 
-    Notes:
-        1. All original comments will be preceeded by ;, as is convention in IDL
-        2. Based on fit_iris_xput.pro by JPW.
+    Parameters
+    ----------
+    tt0 : string
+        Observation date.
+    tcc0 : array_like
+        Time Coefficients.
+    ccc :  array_like
+        Coefficients.
+        
+    Returns
+    -------
+    f : float
+       IRIS crossput.
 
-    History:
-        2021-12-14 - A.W.Peat - Translated from IDL
-        2025-08-12 - A.W.Peat - Numpy deprecation issue fixed
     '''
     tex=1.5 # ; exponent for transition between exp.decay intervals
     if tcc0.shape[1]!=2:
@@ -292,36 +300,56 @@ def fit_iris_xput_lite(tt0, tcc0, ccc):
     return(f)
 
 
-if __name__=="__main__":
-    #When script is called directly, it just looks for new response files#
+def update_response_files(quiet=False):
+    '''
+    Checks https://hesperia.gsfc.nasa.gov/ssw/iris/response/ for new IRIS response files, and downloads any it finds.
+
+    Parameters
+    ----------
+    quiet : bool
+        Whether to suppress printing status and URL errors. Default: False.
+    
+    Returns
+    -------
+    new : bool
+        Whether any new response files were found.
+
+    Example
+    -------
+    >>> import irispreppy as ip
+    >>> f=ip.update_response_files()
+    '''
     toppath=path.dirname(path.realpath(__file__))
     resppath=path.join(toppath, "responses")
-    resps=ls(path.join(resppath, "*.pkl"))
+    resps=glob(path.join(resppath, "*.pkl"))
     resps.sort()
     new=False
     try:
+        if not quiet:
+            print("Connecting to hesperia...")
         with urllib.request.urlopen("https://hesperia.gsfc.nasa.gov/ssw/iris/response/") as respurl:
             htmlsoup=BeautifulSoup(respurl, 'html.parser')
         for tags in htmlsoup.find_all('a'):
             href=tags.get('href')
             if "sra" in href and path.join(resppath, href[:-4]+'pkl') not in resps:
-                print("New response file found, "+href+'.\nDownloading...')
+                new=True
+                if not quiet:
+                    print("New response file found, "+href+'.\nDownloading...')
                 urllib.request.urlretrieve("https://hesperia.gsfc.nasa.gov/ssw/iris/response/"+href, "temp.geny")
                 newgeny=readsav('temp.geny')
                 remove('temp.geny')
                 recgeny=newgeny[list(newgeny.keys())[0]][0]
                 with open(toppath+"/responses/"+href[:-4]+'pkl', "wb") as pklout:
                     pickle.dump(recgeny, pklout)
-
-                resps=ls(toppath+"/responses/*.*") #Needs to reload responses if a new one is found
-                resps.sort()
+                
     except urllib.error.URLError:
-        print("You are not connected to the internet. Cannot check for new response files.")
-        new=True
+        if not quiet:
+            print("Either hesperia is unreachable or you are not connected to the internet. Cannot check for new response files.")
     except:
-        print("Hesperia is reachable but not loading. Cannot check for new response files.")
-        new=True
-    if not new:
-        print("No new response files found.")
+        if not quiet:
+            print("Hesperia is reachable but not behaving expectedly. Cannot check for new response files.")
 
-    
+    if not quiet and not new:
+            print("No new response files found.")
+
+    return(new)
