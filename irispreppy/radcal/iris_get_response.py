@@ -307,7 +307,7 @@ def update_response_files(quiet=False):
     Parameters
     ----------
     quiet : bool
-        Whether to suppress printing status and URL errors. Default: False.
+        Whether to suppress printing status, and URL errors. Default: False.
     
     Returns
     -------
