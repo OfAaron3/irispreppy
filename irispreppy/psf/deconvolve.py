@@ -49,7 +49,11 @@ def decon(rasfits, psfs, iterations=0, fft=False):
             if len(iterations)!=len(indices):
                 ValueError('List or arrays of iterations must be same length as number of wavelength windows and in same order as in fits file.')
             its=iterations[index]
-
+        if type(its)!=int:
+            if int(its)==its:
+                its=int(its)
+            else:
+                raise TypeError("Number of iterations must be an integer (or list of integers).")
         if sbf!=1:
             psf=psfs[psfind]
             psf2use=np.array([np.sum(psf[i*sbf:i*sbf+sbf]) for i in range(0, int(len(psf)/sbf))])
