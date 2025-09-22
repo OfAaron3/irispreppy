@@ -255,7 +255,7 @@ def radiometric_calibrate(ras, quiet=True, error=False):
         print("(This may take some time as it needs to recalculate the excessive amount of stats in the headers)")
 
 
-    hdr0=rasfits[0].header
+    hdr0=dc(rasfits[0].header)
     hdr0['HISTORY']='NUV and FUV radiometric calibration performed on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['BUNIT']="erg s^-1 cm^-2 angstrom^-1 sr^-1"

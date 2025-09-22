@@ -12,7 +12,11 @@ def deconvolve_and_save(ras, filename=None):
         Input IRIS raster
 
     filename : string
-        Filename of output. If not set, will be saved as original filename (and path) with '_d' appended
+        Filename of output. If not set, will be saved as original filename (and path) with '_d' appended.
+
+    Notes
+    -----
+    If no filename is present in the HDUL and filename is not set, the original filename will be deciphered from the header information.
 
     Example
     -------
@@ -22,11 +26,17 @@ def deconvolve_and_save(ras, filename=None):
     >>> frc=ip.deconvolve_and_save(f)
     '''
     if filename is None:
-        if '_rc'!=path.splitext(ras.filename())[0][-3:]:
-            filename=path.splitext(ras.filename())[0]+'_d.fits'
+        if ras.filename()!=None:
+            if '_rc'!=path.splitext(ras.filename())[0][-3:]:
+                filename=path.splitext(ras.filename())[0]+'_d.fits'
+            else:
+                filename=path.splitext(ras.filename())[0]+'d.fits'
         else:
-            filename=path.splitext(ras.filename())[0]+'d.fits'
-        
+            hdr=ras[0].header
+            filename='./iris_l'+str(int(hdr['DATA_LEV']))+'_'+hdr['DATE_OBS'].replace('-','').replace(':', '').replace('T', '_')[:-4]+'_'+hdr['OBSID']+'_raster_t000_r'+str(hdr['RASRPT']-1).zfill(5)+'_d.fits'
+            print("Filename not present in HDUL and no filename set. Saving to,")
+            print(filename)
+
     hdul=deconvolve(ras)
-    hudls.writeto(filename)
+    hdul.writeto(filename)
     
