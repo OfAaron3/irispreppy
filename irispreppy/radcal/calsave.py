@@ -33,8 +33,6 @@ def calibrate_and_save(ras, errors=False, filename=None):
                 filename=path.splitext(ras.filename())[0]+'_rc.fits'
             else: 
                 filename=path.splitext(ras.filename())[0][:-7]+'_rcd.fits'
-
-
         else:
             hdr=ras[0].header
             filename='./iris_l'+str(int(hdr['DATA_LEV']))+'_'+hdr['DATE_OBS'].replace('-','').replace(':', '').replace('T', '_')[:-4]+'_'+hdr['OBSID']+'_raster_t000_r'+str(hdr['RASRPT']-1).zfill(5)+'_rc.fits'
