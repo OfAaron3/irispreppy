@@ -29,7 +29,11 @@ def calibrate_and_save(ras, errors=False, filename=None):
 
     if filename is None:
         if ras.filename()!=None:
-            filename=path.splitext(ras.filename())[0]+'_rc.fits'
+            if ras.filename()[-7:]!='_d.fits':
+                filename=path.splitext(ras.filename())[0]+'_rc.fits'
+            else: 
+                filename=path.splitext(ras.filename())[0][:-7]+'_rcd.fits'
+
 
         else:
             hdr=ras[0].header

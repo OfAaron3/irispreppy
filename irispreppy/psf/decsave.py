@@ -27,7 +27,7 @@ def deconvolve_and_save(ras, filename=None):
     '''
     if filename is None:
         if ras.filename()!=None:
-            if '_rc'!=path.splitext(ras.filename())[0][-3:]:
+            if path.splitext(ras.filename())[0][-3:]!='_rc':
                 filename=path.splitext(ras.filename())[0]+'_d.fits'
             else:
                 filename=path.splitext(ras.filename())[0]+'d.fits'
