@@ -54,7 +54,7 @@ jobs:
         cd NewDocs
         tar -xvf docs.tar
     - name: Move docs
-      run:  cp -a --verbose NewDocs/docs/_build/html docs
+      run:  cp -a --verbose NewDocs/docs/build/html docs
 
     - name: Commit docs
       run: |
