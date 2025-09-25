@@ -39,7 +39,7 @@ ip.deconvolve_and_save(rc)	        #Radiometrically calibrated and deconvolved
 
 ### Documentation
 
-Documentation for irispreppy can now be found [here](ofaaron3.github.io/irispreppy).
+Documentation for irispreppy can now be found [here](https://ofaaron3.github.io/irispreppy).
 
 ---
 
@@ -49,4 +49,4 @@ Thank you to [Dr Graham S. Kerr](https://github.com/grahamkerr) for IRIS_SG_deco
 
 Special thanks to [Dr C.M.J. Osborne](https://github.com/Goobley) for putting up with my incessant and innane questions.
 
-Makes use of the excellent WENO4 algorithm ([Janett et al. 2019](doi.org/10.1051/0004-6361/201834761)) implemented in Python3 by Dr C.M.J. Osborne [here](https://github.com/Goobley/Weno4Interpolation).
+Makes use of the excellent WENO4 algorithm ([Janett et al. 2019](https://doi.org/10.1051/0004-6361/201834761)) implemented in Python3 by Dr C.M.J. Osborne [here](https://github.com/Goobley/Weno4Interpolation).
