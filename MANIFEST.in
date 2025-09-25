@@ -1,2 +1,0 @@
-include irispreppy/radcal/responses/*pkl
-include irispreppy/psf/IRIS_SG_PSFs.pkl
