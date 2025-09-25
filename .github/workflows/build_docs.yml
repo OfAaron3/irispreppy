@@ -24,7 +24,6 @@ jobs:
     - name: Build docs
       run: |
         cd docs
-        ls
         make html
         touch build/html/.nojekyll
     - name: Pack docs
