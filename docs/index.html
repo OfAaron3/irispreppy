@@ -1,0 +1,142 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to irispreppy’s documentation &mdash; irispreppy 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=acc74ff5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quickstart" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            irispreppy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="irispreppyapi.html">irispreppy API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">irispreppy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to irispreppy’s documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-irispreppy-s-documentation">
+<h1>Welcome to irispreppy’s documentation<a class="headerlink" href="#welcome-to-irispreppy-s-documentation" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#simplest-usage">Simplest Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#saving-files">Saving files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="irispreppyapi.html">irispreppy API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="irispreppyapi.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="irispreppyapi.html#module-irispreppy.radcal.radcal">irispreppy.radcal.radcal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="irispreppyapi.html#module-irispreppy.radcal.iris_get_response">irispreppy.radcal.iris_get_response module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="irispreppyapi.html#module-irispreppy.radcal.calsave">irispreppy.radcal.calsave module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="irispreppyapi.html#module-irispreppy.psf.deconvolve">irispreppy.psf.deconvolve module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="irispreppyapi.html#module-irispreppy.psf.decsave">irispreppy.psf.decsave module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>irispreppy is built to perform radiometric calibration and point spread function deconvolution of data from the spectrograph onboard the Interface Region Imaging Spectrograph (<a class="reference external" href="https://doi.org/10.1007/s11207-014-0485-y">IRIS</a>).</p>
+<p>The radiometric calibration follows the procedure laid out in section 5.2 of IRIS Technical Notes 26 (ITN 26; <a class="reference external" href="https://iris.lmsal.com/itn26/calibration.html#radiometric-calibration">html</a>; <a class="reference external" href="http://iris.lmsal.com/itn26/itn26.pdf">pdf</a>), and more generally IRIS Technical Notes 24 (ITN 24; <a class="reference external" href="https://www.lmsal.com/iris_science/doc?cmd=dcur&amp;proj_num=IS0123&amp;file_type=pdf">pdf</a>).</p>
+<p>The point spread function deconvolution is done using either the <a class="reference external" href="https://doi.org/10.1364/JOSA.62.000055">Richardson</a>-<a class="reference external" href="https://doi.org/10.1086/111605">Lucy</a> deconvolution method, or through division in Fourier space. The number of default <a class="reference external" href="https://doi.org/10.1364/JOSA.62.000055">Richardson</a>-<a class="reference external" href="https://doi.org/10.1086/111605">Lucy</a> iterations used is discussed in <a class="reference external" href="https://doig.org/10.1007/s11207-018-1347-9">Courrier et al. (2018)</a>.</p>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, A. W. Peat.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
