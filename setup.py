@@ -6,7 +6,9 @@ def readme():
         return f.read()
 
 setup(name='irispreppy',
-      version="3.0.0",
+      description="For radiometric calibration and point spread fcuntion deconvolution of IRIS spsetcrograph data",
+      setup_requires=["setuptools_scm"],
+      use_scm_version=True,
       url='https://github.com/OfAaron3/irispreppy',
       author='Aaron W. Peat',
       author_email='aaron.peat@uwr.edu.pl',

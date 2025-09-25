@@ -1,7 +1,7 @@
 # irispreppy
 For radiometrically calibrating and PSF deconvolving IRIS data.
 
-To install run `pip install irispreppy`.
+To install simply run `pip install irispreppy`.
 
 I dislike how I need to own proprietary software (IDL) just to simply prepare my data. I use Python for my analysis, why can't I radiometrically calibrate and deconvolve with it?
 This has been a passion project of mine during my PhD (and beyond). The radiometric calibration keeps itself up to date with the response files by checking https://hesperia.gsfc.nasa.gov/ssw/iris/response/ every time it is run. If it finds new files, it downloads them before continuing.
@@ -10,7 +10,7 @@ These scripts should be general purpose and "just work". No janky hacks are pres
 
 ---
 
-tl;dr usage
+### tl;dr usage
 
 irispreppy takes a single HDU object. To calibrate and deconvolve,
 
@@ -18,9 +18,9 @@ irispreppy takes a single HDU object. To calibrate and deconvolve,
 from astropy.io import fits
 import irispreppy as ip
 
-raw=fits.open("path/to/file.fits") #Raw data
-rc=ip.radcal(raw)                  #Radiometrically calibrated
-rc_d=ip.deconvolve(rc)             #Radiometrically calibrated and deconvolved
+raw=fits.open("iris_raster.fits") #Raw data
+rc=ip.radiometric_calibrate(raw)  #Radiometrically calibrated
+rc_d=ip.deconvolve(rc)            #Radiometrically calibrated and deconvolved
 ```
 
 To calibrate and deconvolve, and save,
@@ -29,22 +29,24 @@ To calibrate and deconvolve, and save,
 from astropy.io import fits
 import irispreppy as ip
 
-raw=fits.open("path/to/file.fits")   #Raw data
-ip.radcal(raw, save=True)            #Radiometrically calibrated
-rc=fits.open("path/to/file_rc.fits") #Radiometrically calibrated data
-ip.deconvolve(rc, save=True)	     #Radiometrically calibrated and deconvolved
+raw=fits.open("iris_raster.fits")   #Raw data
+ip.calibrate_and_save(raw)          #Radiometrically calibrated
+rc=fits.open("iris_raster_rc.fits") #Radiometrically calibrated data
+ip.deconvolve_and_save(rc)	        #Radiometrically calibrated and deconvolved
 ```
 
 ---
 
-More in depth documentation will be added in the future<sup>TM</sup>.
+### Documentation
+
+Documnetation for irispreppy can now be found [here](ofaaron3.github.io/irispreppy).
 
 ---
 
-Acknowledgements
+### Acknowledgements
 
 Thank you to [Dr Graham S. Kerr](https://github.com/grahamkerr) for IRIS_SG_deconvolve.py and IRIS_SG_PSFs.pkl.
 
 Special thanks to [Dr C.M.J. Osborne](https://github.com/Goobley) for putting up with my incessant and innane questions.
 
-Makes use of the excellent WENO4 algorithm ([Janett et al. 2019](https://ui.adsabs.harvard.edu/abs/2019A%26A...624A.104J/abstract)) implemented in Python3 [by Dr C.M.J. Osborne here](https://github.com/Goobley/Weno4Interpolation).
+Makes use of the excellent WENO4 algorithm ([Janett et al. 2019](doi.org/10.1051/0004-6361/201834761)) implemented in Python3 by Dr C.M.J. Osborne [here](https://github.com/Goobley/Weno4Interpolation).
