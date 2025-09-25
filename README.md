@@ -39,7 +39,7 @@ ip.deconvolve_and_save(rc)	        #Radiometrically calibrated and deconvolved
 
 ### Documentation
 
-Documnetation for irispreppy can now be found [here](ofaaron3.github.io/irispreppy).
+Documentation for irispreppy can now be found [here](ofaaron3.github.io/irispreppy).
 
 ---
 
