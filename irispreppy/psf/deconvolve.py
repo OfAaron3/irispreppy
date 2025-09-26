@@ -106,7 +106,7 @@ def decon(rasfits, psfs, iterations=0, fft=False):
     del dattot  
 
     if fft:
-        hdr0['HISTORY']='PSF deconvolution performed by division in Fouier space on '+dt.datetime.now().strftime("%Y-%m-%d")
+        hdr0['HISTORY']='PSF deconvolution performed by division in Fourier space on '+dt.datetime.now().strftime("%Y-%m-%d")
     else:
         hdr0['HISTORY']='PSF deconvolution performed by Richardson-Lucy algorithm on '+dt.datetime.now().strftime("%Y-%m-%d")
     hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
