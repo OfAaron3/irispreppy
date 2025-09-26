@@ -104,6 +104,9 @@ def decon(rasfits, psfs, iterations=0, fft=False):
     hdr0['DATAP99']=np.percentile(dattot, 99)
     del dattot  
 
+    hdr0['HISTORY']='PSF Deconvolution performed on '+dt.datetime.now().strftime("%Y-%m-%d")
+    hdr0['HISTORY']='FITS made with astropy on '+dt.datetime.now().strftime("%Y-%m-%d")
+    
     phdu=fits.PrimaryHDU(None, header=hdr0)
     hduls=[phdu]
     for index, key in enumerate(indices):
