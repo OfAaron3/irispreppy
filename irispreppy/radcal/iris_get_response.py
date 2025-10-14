@@ -134,7 +134,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
             o[k]['AREA_SG'][0,w]=interp(r['lambda'][w])
             # ;Version 009+ only: Remove wavelength dependence for the Si IV part of the FUV window.
             if int(o1['VERSION'])>=9 and j==1:
-                o[k]['AREA_SG'][0, w]=np.ones(np.sum(w0))*np.mean(o[k]['AREA_SG'])
+                o[k]['AREA_SG'][0, w]=np.ones(np.sum(w))*np.mean(o[k]['AREA_SG'][0,w])
 
 
     #3. NUV SG Effective Areas
