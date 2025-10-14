@@ -132,6 +132,9 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
             interp=interp1d(r['c_f_lambda'][j:j+2], rr[k, j:j+2], fill_value='extrapolate')
             #If you feel uneasy about this extrapolation, this is how iris_get_resposne.pro works implicitly
             o[k]['AREA_SG'][0,w]=interp(r['lambda'][w])
+            # ;Version 009+ only: Remove wavelength dependence for the Si IV part of the FUV window.
+            if int(o1['VERSION'])>=9 and j==1:
+                o[k]['AREA_SG'][0, w]=np.ones(np.sum(w0))*np.mean(o[k]['AREA_SG'])
 
 
     #3. NUV SG Effective Areas
@@ -143,6 +146,19 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
     rr=np.zeros((ntt, sz[0]))
     for j in range(0, sz[0]):
         rr[:,j]=fit_iris_xput_lite(date, r['c_n_time'], r['coeffs_nuv'][j])
+
+    # ; apply wavelength-independent factor to all wavelengths sz[3]
+    if int(o1['VERSION'])==7:
+        #;determine if input time contains period of A1 QS 2820-2832A trend...
+        #This appears to be a "quick fix" for the effective area drop
+        trend_tim=np.array([t[:10] for t in r['TREND_TIM'].astype(str)])
+        if (trend_tim==tt[:10]).any():
+            tt1=np.argmax(trend_tim==tt[:10])
+            if tt1==0 and trend_tim[0]==tt[:10] or tt1>0:
+                trendy=r['TREND'][tt1]
+                for j in range(0, sz[0]):
+                    rr[:,j]=rr[:,j]*trendy                     
+
     #; interpolate onto lambda grid
     w=(r['lambda']>=lamran[0]) & (r['lambda']<=lamran[1])
     if int(r['version'])<3:
@@ -152,6 +168,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
     else: #I guess for version>=3, len(r['c_n_lambda'])>2
         interp=interp1d(r['c_n_lambda'], rr[k], fill_value='extrapolate', kind='quadratic')
         o[k]['AREA_SG'][1,w]=interp(r['lambda'][w])
+
 
     #4. SJI Effective Areas
     if int(r['version'])<3:
