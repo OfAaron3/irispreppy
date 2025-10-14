@@ -33,7 +33,8 @@ def IRIS_SG_deconvolve(data_in, psf, iterations, fft_div=False):
     if fft_div:
         dcvim = FFT_conv_1D(data_in, psf, div=True)
     else:
-        with warnings.catch_warnings(action="ignore"): #Divide by zero warnings will happen
+        with warnings.catch_warnings(): #Divide by zero warnings will happen
+            warnings.simplefilter('ignore')
             for ind in range(0,iterations):
                 step1=data_in_zr/(FFT_conv_1D(dcvim, psf, rev_psf=False, div=False))
                 step2=FFT_conv_1D(step1, psf, rev_psf=True)
