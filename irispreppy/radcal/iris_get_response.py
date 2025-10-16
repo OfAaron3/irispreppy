@@ -73,18 +73,18 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
         response=resps[1] #This is version 2, which is file 1.
     elif version!=0:
         if version<=0:
-            if response_status and not quiet:
+            if not quiet:
                 print("No such version of response file. Defaulting to most recent version.")
             response=resps[-1]
         elif version<=len(resps):
             response=resps[version-1]
         else:
-            if response_status and not quiet:
+            if not quiet:
                 print("Requested version of response file not found. Defaulting to most recent version.")
             response=resps[-1]
     elif response_file is not None:
         if toppath+"/responses/"+response_file not in resps:
-            if response_status and not quiet:
+            if not quiet:
                 print(response_file+" not found. Using most recent file.")
             response=resps[-1]
         else:
@@ -133,7 +133,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
             #If you feel uneasy about this extrapolation, this is how iris_get_resposne.pro works implicitly
             o[k]['AREA_SG'][0,w]=interp(r['lambda'][w])
             # ;Version 009+ only: Remove wavelength dependence for the Si IV part of the FUV window.
-            if int(o1['VERSION'])>=9 and j==1:
+            if int(o['VERSION'])>=9 and j==1:
                 o[k]['AREA_SG'][0, w]=np.ones(np.sum(w))*np.mean(o[k]['AREA_SG'][0,w])
 
 
@@ -152,9 +152,9 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
         #;determine if input time contains period of A1 QS 2820-2832A trend...
         #This appears to be a "quick fix" for the effective area drop
         trend_tim=np.array([t[:10] for t in r['TREND_TIM'].astype(str)])
-        if (trend_tim==tt[:10]).any():
-            tt1=np.argmax(trend_tim==tt[:10])
-            if tt1==0 and trend_tim[0]==tt[:10] or tt1>0:
+        if (trend_tim==date[:10]).any():
+            tt1=np.argmax(trend_tim==date[:10])
+            if (tt1==0 and trend_tim[0]==date[:10]) or tt1>0:
                 trendy=r['TREND'][tt1]
                 for j in range(0, sz[0]):
                     rr[:,j]=rr[:,j]*trendy                     
@@ -179,7 +179,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
             for k in range(0, len(r['index_el_sji'][0])):
                 pl_a=(pl_a*np.array([[r['elements'][r['index_el_sji'][0]][i][1]] for i in range(0, r['elements'][r['index_el_sji'][0]].shape[0])])).T
                 pl_a=pl_a[:,0,:] #Because of the way I get this to work, I introduce an extra 1-length axis
-            rr=fit_iris_xput_lite(time, r['c_s_time'][j], r['coeffs_sji'][j])
+            rr=fit_iris_xput_lite(date, r['c_s_time'][j], r['coeffs_sji'][j])
             for k in range(0, ntt):
                 o[k]['AREA_SJI'][j]=pl_a*rr[k]
 
