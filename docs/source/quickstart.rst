@@ -18,13 +18,13 @@ Once installed, the simplest way to radiometrically calibrate and point spread f
 .. code-block:: python
 
     from astropy.io import fits
-    import irispreppy as ip 
+    import irispreppy as ip
 
     f=fits.open("iris_raster.fits")
     frc=ip.radiometric_calibrate(f)
     frcd=ip.deconvolve(frc)
 
-The files returned by irispreppy are structured identically to that of Level-2 IRIS fits. 
+The files returned by irispreppy are structured identically to that of Level-2 IRIS fits.
 
 Saving files
 ------------
@@ -33,7 +33,7 @@ In order to radiometrically calibrate, point spread function deconvolve, and sav
 .. code-block:: python
 
     from astropy.io import fits
-    import irispreppy as ip 
+    import irispreppy as ip
 
     f=fits.open("iris_raster.fits")
     ip.calibrate_and_save(f)
@@ -48,7 +48,7 @@ Where we also reopen the data that has been saved to disk.
 .. code-block:: python
 
     from astropy.io import fits
-    import irispreppy as ip 
+    import irispreppy as ip
 
     f=fits.open("iris_raster.fits")
     ip.calibrate_and_save(f, filename="iris_raster_calibrated.fits")

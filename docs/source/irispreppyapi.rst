@@ -14,7 +14,7 @@ irispreppy.radcal.radcal module
 irispreppy.radcal.iris\_get\_response module
 --------------------------------------------
 
-.. automodule:: irispreppy.radcal.iris_get_response 
+.. automodule:: irispreppy.radcal.iris_get_response
     :members:
     :show-inheritance:
 
@@ -39,4 +39,3 @@ irispreppy.psf.decsave module
 .. automodule:: irispreppy.psf.decsave
     :members:
     :show-inheritance:
-
