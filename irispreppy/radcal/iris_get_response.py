@@ -148,7 +148,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
         rr[:,j]=fit_iris_xput_lite(date, r['c_n_time'], r['coeffs_nuv'][j])
 
     # ; apply wavelength-independent factor to all wavelengths sz[3]
-    if int(o1['VERSION'])==7:
+    if int(o['VERSION'])==7:
         #;determine if input time contains period of A1 QS 2820-2832A trend...
         #This appears to be a "quick fix" for the effective area drop
         trend_tim=np.array([t[:10] for t in r['TREND_TIM'].astype(str)])
