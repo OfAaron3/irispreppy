@@ -133,7 +133,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
             #If you feel uneasy about this extrapolation, this is how iris_get_resposne.pro works implicitly
             o[k]['AREA_SG'][0,w]=interp(r['lambda'][w])
             # ;Version 009+ only: Remove wavelength dependence for the Si IV part of the FUV window.
-            if int(o['VERSION'])>=9 and j==1:
+            if int(o[0]['VERSION'])>=9 and j==1:
                 o[k]['AREA_SG'][0, w]=np.ones(np.sum(w))*np.mean(o[k]['AREA_SG'][0,w])
 
 
@@ -148,7 +148,7 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
         rr[:,j]=fit_iris_xput_lite(date, r['c_n_time'], r['coeffs_nuv'][j])
 
     # ; apply wavelength-independent factor to all wavelengths sz[3]
-    if int(o['VERSION'])==7:
+    if int(o[0]['VERSION'])==7:
         #;determine if input time contains period of A1 QS 2820-2832A trend...
         #This appears to be a "quick fix" for the effective area drop
         trend_tim=np.array([t[:10] for t in r['TREND_TIM'].astype(str)])
@@ -233,7 +233,8 @@ def iris_get_response(date=None, version=0, response_file=None, pre_launch=False
                 o[k]['AREA_SJI'][j]=o[k]['AREA_SJI'][j]*rr[k]
 
     if angstrom:
-        o['lambda']=o['lambda']*10
+        for k in range(0, ntt):
+            o[k]['lambda']=o[k]['lambda']*10
     return(o)
 
 
