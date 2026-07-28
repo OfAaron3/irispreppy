@@ -40,7 +40,7 @@ Indices and tables
 Special Thanks
 ==============
 
-Dr Graham S. Kerr: For the initial IDL to Python translation of the deconvolution script.\n
-Dr Christopher M.J. Osborne: For general tips on how to package irispreppy.\n
-Dr Tiago M.D. Pereira: For responding to my one email about a cryptic variable in ITN26.
+| Dr Graham S. Kerr: For the initial IDL to Python translation of the deconvolution script.
+| Dr Christopher M.J. Osborne: For general tips on how to package irispreppy.
+| Dr Tiago M.D. Pereira: For responding to my one email about a cryptic variable in ITN26.
 
