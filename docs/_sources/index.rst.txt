@@ -22,7 +22,7 @@ irispreppy is built to perform radiometric calibration and point spread function
 
 The radiometric calibration follows the procedure laid out in section 5.2 of IRIS Technical Notes 26 (ITN 26; `html <https://iris.lmsal.com/itn26/calibration.html#radiometric-calibration>`_; `pdf <http://iris.lmsal.com/itn26/itn26.pdf>`_), and more generally IRIS Technical Notes 24 (ITN 24; `pdf <https://www.lmsal.com/iris_science/doc?cmd=dcur&proj_num=IS0123&file_type=pdf>`_).
 
-The point spread function deconvolution is done using either the Richardson_-Lucy_ deconvolution method, or through division in Fourier space. The number of default Richardson_-Lucy_ iterations used is discussed in `Courrier et al. (2018) <https://doig.org/10.1007/s11207-018-1347-9>`_.
+The point spread function deconvolution is done using either the Richardson_-Lucy_ deconvolution method, or through division in Fourier space. The number of default Richardson_-Lucy_ iterations used is discussed in `Courrier et al. (2018) <https://doig.org/10.1007/s11207-018-1347-9>`_. Care is taken to account for the spatial binning factor such that the deconvolution is calculated correctly (not present in the IDL version).
 
 .. _IRIS: https://doi.org/10.1007/s11207-014-0485-y 
 .. _Richardson: https://doi.org/10.1364/JOSA.62.000055
@@ -36,4 +36,11 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Special Thanks
+==============
+
+Dr Graham S. Kerr: For the initial IDL to Python translation of the deconvolution script.
+Dr Christopher M.J. Osborne: For general tips on how to package irispreppy.
+Dr Tiago M.D. Pereira: For responding to my one email about a cryptic variable in ITN26.
 
